@@ -1,0 +1,479 @@
+---
+title: "Predicting plant responses to precipitation"
+author: "Andrew Kleinhesselink"
+date: "3/25/2019"
+output: html_document
+csl: ecology.csl
+bibliography: precip_experiment.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract 
+
+Interannual variation in weather is an important driver of population dynamics for many organisms. However, there have been few rigorous tests of whether observational timeseries of population dynamics can predict how those populations will respond to future variation in climate and weather. We used a long term historical data documenting the response of four perennial plant populations to interannual climate variation to predict how those same populations would respond to present-day experimental precipitation manipulations. 
+
+We drew our data from a XX year timeseries of mapped plant growth, survival and recruitment in 26 plots from the year 1926 to 2016.  We fitted statistical models to describe the annual growth, survival and recruitment of four dominant perennial plants in these plots--three grasses: *Hesperostipa comata*, *Pseudoroegneria spicata* and *Poa secunda*--and one shrub, *Artemisia tripartita*.  For each species, we fit 8 different models including different combinations of annual climate covariates.  We evaluated model performance using K-fold cross validation.  
+
+To test whether the models that best predicted population dynamics in the observational data could indeed predict population response to interannual variation in weather, we constructed a rain-out shelter and irrigation experiment to manipulate precipitation and soil moisture among a set of 16 new plots. For five years, we decreased ambient spring through fall precipitation by one-half on eight drought plots and doubled precipitation on eight irrigated plots. In addition, we continued data collection during the years of the experiment in 16 of the original historical plots. 
+
+We used the demographic models fitted to the historical data to predict population changes in each of the new experimental plots during the course of the experiment. **ADD results*** 
+
+Over the course of the experiment, average cover of the perennial grasses, *Hesperostipa comata* and *Pseudoroegneria spicata* declined significantly in the drought treatment. At the level of individual vital rates, experimental drought reduced the survival of *Hesperostipa comata* and *Pseudoroegnaria* and the growth of the grass *Poa secunda*. In contrast, drought increased the growth of the shrub *Artemisia*. The climate model made better predictions of the experimental responses than the no climate model in six out of twelve cases. Across all species and vital rates, there was a strong positive correlation between the observed responses to the treatments and the responses predicted by the climate model. At the population-level, the climate model predicted changes in species cover more accurately than the no climate model for *Poa* and *Pseudoroegnaria*. 
+
+Observational climate data held valuable information for predicting species' responses to a climate change experiment in this ecosystem. Treatment responses often matched the direction of predicted responses even when the effects were not significant. We were better able to predict species' responses to the drought treatment than to the control and irrigation treatments, suggesting that soil moisture is an important factor for predicting the population dynamics of these species but only when water is truly limiting.
+
+# Introduction 
+
+Interannual variation in weather is a powerful drivers of species population dynamics (@post_synchronization_2002, @davis_range_2001, @walther_ecological_2002). The effects of climate on populations and ecosystems are most apparent at the largest scales: climate determines the distribution of ecosystems (@whittaker_communities_1975), treelines (@korner_alpine_2012) and the the range limits of many species (@parmesan_globally_2003, @davis_range_2001). Understanding and predicting the effects of climate on populations is an increasingly important goal if we are to anticipate the effects of climate change on earth's ecosystems (@tredennick_we_2016, @petchey_ecological_2015,@ehrlen_advancing_2016, @teller_linking_2016).
+ 
+Ecologists often resort to one of two methods for predicting the effects of future weather varition on populations and communities: they may use experiments to manipulate aspects of climate directly and observe the response of populations (@elmendorf_experiment_2015,@knapp_pushing_2016,@compagnoni_warming_2014); or they may use long term observational data on species performance and abundance collected over many years and relate this to ambient annual variation in climate  (@koons_climate_2012,@lunn_demography_2016,@dalgleish_climate_2010,@jenouvrier_demographic_2009). The strength of the experimental approach is in the stronger inference that comes from manipulating some aspects of climate while controlling for other factors; for instance, knowing that loss of snow cover, and not necessarily changes in soil temperature or moisture are factors causing a species performance to change with warming (@compagnoni_warming_2014). It also allows for the creation of conditions that may be more extreme than those observed historically (@knapp_pushing_2016) but are possible in the future. However, it is often expensive to control climate at even the smallest scales, and larger scale climate manipulation is often impossible.  Moreover, experimental manipulation can come with artifacts that may make them less then ideal models for understanding and predicting the effects of future variation in climate (@wolkovich_warming_2012). 
+
+The use of observational data to predict the effects of climate variation on populations has its own advantages and disadvantages. Analyses of already existing long-term ecological data are cheaper than experiments and are possible for many species that would be difficult to experiment with (@koons_climate_2012,@jenouvrier_demographic_2009,@aubry_climate_2013). The disadvantage is the reliance on correlative relationships between population dynamics and wheather. This means that many years of data are needed to reliably detect climate effects, especially when annual variation in demographic rates is high (@teller_linking_2016,@gerber_optimal_2015). (@teller_linking_2016) estimate that even cutting edge statistical approaches for fitting relationships between climate and species performance require at least 20-25 years of independent climate observations before they perform well. Moreover, even strong correlations between species performance and climate covariates may not reflect direct causation, leading to failures when predicting future, out of sample performance (@hilborn_correlation_2016). 
+
+The extrapolation of climate-demography correlations presents another potential problem. In many systems, future precipitation and temperature will fall outside the range of historical variation. If species performance responds non-linearly to these drivers, fitting linear models for species responses to climate may produce larger errors when future conditions are outside the range of observed variation (@doak_demographic_2010). In addition, climate change will not only alter average weather, but is also likely to increase the variance in precipitation and the frequency of extreme events, which will have their own consequences independent of changes in means (@gherardi_enhanced_2015,@jentsch_new_2007). Any models based on observations drawn from the historical range of variation may fail when challenged with novel conditions in the future (@williams_novel_2007). 
+
+Among plant populations, interannual variation in precipitation and or soil moisture often drives variation in net primary productivity (@knapp_variation_2001,@hsu_anticipating_2014), the annual growth rates of the woody tissue in trees and shrubs ((@yang_3500-year_2014),(@srur_annual_2009,@franklin_growth_2013)), and the germination and reproductive output of annuals (@venable_bet_2007). Despite clear signs that precipitation shold be important for plant populations, there have been relatively few studies that clearly link observed variation in precipitation to species performance in population models (@ehrlen_advancing_2016). (@adler_can_2013) showed that population models based on observed correlations between plant population growth rates and precipitation did have some predictive power in describing species response to a short-term climate manipulation. 
+
+Here, we test the ability of models fit to long-term historical data to predict the effects of experimental climate manipulations in the present day. A demonstration that demographic models fitted to observational timeseries of population performance can skillfully predict experimental responses would provide strong confirmation that observed climate-demography correlations will hold in the future (@adler_can_2013). 
+
+The sagebrush steppe plant community at the US Sheep Experiment Station near Dubois, Idaho offers an ideal opportunity to test whether the climate effects in plant populations models derived from observational data can also be used to predict species responses to controlled precipitation experiments. The demography of three perennial bunchgrasses and a shrub species at the USSES have been described in detail in seven different studies since 2010, several of which report significant effects of seasonal precipitation on the vital rates and overall population growth rates of these species ((@adler_coexistence_2010,adler_forecasting_2012,adler_weak_2009,adler_weak_2016,chu_direct_2016,chu_large_2015,dalgleish_climate_2010)).
+
+If models based on observational data can predict the response of these well studied species to a precipitation experiment we will gain confidence in using long-term population monitoring data to predict species responses to future climate change. 
+
+# Methods
+
+## Study site and historical dataset 
+
+The U.S. Sheep Experiment Station (USSES) is located at Dubois, Idaho (44.2\degree N, 112.1\degree W), 1500 m above sea level. During the period of data collection (1926 – 2016), mean annual precipitation was 270 mm and mean temperatures ranged from -8\degree C (January) to 21\degree C (July). The vegetation is dominated by a shrub, *Artemisia tripartita*, and three perennial C3 grasses: *Pseudoroegneria spicata*, *Hesperostipa comata*, and *Poa secunda*. These dominant species account for over 70\% of basal cover and 60\% of canopy cover at this site. 
+
+Scientists at the USSES established 26 1-m$^2$ quadrats between 1926 and 1932. Eighteen quadrats were distributed among four ungrazed exclosures, and eight were distributed in two paddocks grazed at medium intensity spring through fall. All quadrats were located on similar topography and soils. In most years until 1957, all individual plants in each quadrat were mapped using a pantograph (@blaisdell_seasonal_1958). The historical data set is public and available online (@zachmann_mapped_2010). In 2007, we located 14 of the original quadrats, all of which are inside permanent livestock exclosures, and resumed annual mapped censusing using the traditional pantograph method. Daily temperature and precipitation has been monitored throughout this period at a climate station located at the USSES headquarters (station id: GHCND:USC00102707) which located within 2 km of the research plots.  We downloaded daily and monthly tmin, tmax, and precipitation data from the National Climate Data Centers online database.  
+
+We extracted data on survival, growth, and recruitment from the mapped quadrats based on plants' spatial locations. Our approach tracks genets representing individual plants.  For the shrub, each genet is associated with the basal position of a stem.  For the bunchgrasses, each genet represents a spatially distinct polygon in the mapped quadrat. These genets may fragment and/or coalesce over time. Each mapped polygon is classified as a surviving genet or a new recruit based on its spatial location relative to genets present in previous years (@lauenroth_demography_2008). We modeled vital rates using data from 21 year-to-year transitions between 1929 and 1957, and four year-to-year transitions from 2007 to 2011.  
+
+## Precipitation experiment
+
+In spring 2011, we selected locations for an additional 16 quadrats for the precipitation experiment. We located these in a large exclosure containing six of the historical permanent quadrats.  We avoided plots falling on hill slopes, areas with greater than 20\% bare rock, or with over 10\% cover of the woody shrubs *Purshia tridentata* or *Amelanchier utahensis. New plots were established in pairs, and one plot per pair was randomly assigned to either the precipitation reduction or the precipitation addition treatment. We mapped the quadrats in June, 2011 and then built the rainfall shelters and set-up the irrigation systems in the fall of 2011. We used a rain-out shelter and automatic irrigation design described in (@gherardi_automated_2013). Each rain-out shelter covered an area of 2.5 by 2 m and consisted of transparent acrylic shingles held up 1.5 to 1 m over the plot to channel 50\% of incoming rainfall off of the plot and into 75 l reservoirs. The collected water was pumped out of reservoirs and sprayed onto paired irrigation treatment plots. Pumping was initiated automatically with float switches that were triggered when water levels in the reservoirs were approximately 20 l, or equivalently irrigation was triggered once for every 6 mm of rainfall collected. We disconnected the irrigation pumps in late fall each year and re-connected them in April.  The drought shelters remained in place throughout the year.  
+
+We monitored soil moisture and air temperature in four of the precipitation experiment plot pairs using Decagon Devices (Pulman Washington) 5TM and EC-5 soil moisture sensors and 5TE temperature sensors.  We installed two soil moisture sensors in each monitored plot at 5 cm and two at 25 cm deep in the soil.  Air temperature was measured underneath the roofing of the shelter at 30 cm above ground. For each pair of manipulated plots, we also installed sensors in a nearby area to measure ambient rainfall and temperature. Data were logged automatically every four hours. We augmented automatic monitoring of the climate in these plots with direct measurements of soil moisture with a handheld EC-5 soil moisture sensor at six points around all 16 plots on 6/6/2012, 4/29/2015, 5/7/2015, 6/9/2015 and 5/10/2016. We analyzed these spot measurements for significant treatment effects on soil moisture using a linear mixed effects model with the *lmer* package in R, with plot, plot group, and date as random effects in the model (@bates_fitting_2015).    
+
+We conducted a simple statistical test to determine the net effect of the experimental treatments on cover of each species. We calculated the log change in cover for each of the four focal species in each quadrat from from the start of the experiment to the last year of the experiment as $log(Cover_{2016}/Cover_{2011})$.  We then tested for the effect of experimental treatment on this measure with a linear model in R.
+
+## Soil moisture modeling
+
+We expected that our precipitation manipulation experiment would affect plants by altering available soil moisture during the growing season.  Because we do not have direct soil moisture measures for each year of observed plant cover in the historical record, we used the SOILWAT soil moisture model to estimate daily soil moisture at the USSES from 1925 to the present (@sala_long-term_1992, @bradford_ecohydrology_2014). SOILWAT uses daily weather data, ecosystem specific vegetation properties and site specific soil properties to estimate water balance processes. SOILWAT specifically estimates rainfall interception by vegetation, evaporation of intercepted water, snow melt and snow redistribution, infiltration into the soil, percolation through the soil, bare-soil evaporation, transpiration from each soil layer, and drainage. We parameterized SOILWAT with the generic sagebrush steppe vegetation parameters and site specific soil texture and bulk density data. We used daily weather data collected at the USSES from 1925 until the present as weather forcing data for the SOILWAT predictions.  
+
+We averaged daily soil moisture predictions from SOILWAT from upper 40 cm of soil and then averaged these seasonally to serve as the covariates in the vital rate regressions for each species. Because we did not monitor soil moisture directly in all control, drought and irrigation plots, we used a model to describe the average treatment effects on soil moisture during the course of the experiment. To do this we first averaged observed soil moisture data by date and plot and then standardized these by the mean and standard deviation of the control soil moisture conditions observed within each plot group. We then found the difference between the soil moisture in the treated plots and the ambient conditions. We then modeled these treatment effects as a function of season and whether a day was rainy or dry. We expected that our drought and irrigation treatments might be more effective during rainy weather than during dry weather. Rainy days were defined as any days when any precipitation was recorded and average temperatures were above 3 degrees C. The day immediately following rainfall was also classified as rainy. We fit this model using the *lmer* package in R with random effects for plot group and date (@bates_fitting_2015). We then used this model to predict the treatment effects on soil moisture for the entire study period from the ambient soil moisture values predicted from the SOILWAT model described above. These adjusted soil moisture values reflected the average season and rainfall dependent effects of the experimental treatments on soil moisture and could be used as covariates for predicting the effects of our manipulation on each species demographic rates. 
+
+## Overview of the analysis
+
+Our analysis consists of two separate datasets and three different vital rate models. We refer to the first dataset as the training data. It consists of all the historical data collected from 1925 to 1957 as well as the contemporary data collected from the same plots from 2007 to 2010. These data record the response of plants in each plot to the ambient climate variation. We refer to the second dataset as the validation data.  It consists of the data collected from 2011 to 2016 from the 16 new experimentally manipulated plots as well as from 14 of the original historical plots which serve as ambient climate controls.  
+
+### Climate windows 
+
+For each vital rate and species, we fit eight models to the training dataset only. The first model, we refer to as the "null" model, and did not include any climate covariates. Annual demographic data can be related to an infinite number of combinations of seasonal climate covariates, varying in the seasonal window (spring, summer, fall, winter), number of lag years and the presence or absence of interactions.  We narrowed these down to just seven models, each with a measure of annual soil moisture, annual temperature and their interaction. The annual climate covariates in each model differed only in the duration of the seasonal window over which they were averaged. We always included temperature and soil moisture of the most recent spring (March through May). So for a plant measured in the summer of 2007 and again in 2008, spring soil moisture and temperature of 2008 were always included in the average. We then extended this averaging window backward up to three years, including the preceding two summers and preceding two falls. Averages that included the fall period always included the summer period.  See Table 1 for a full list and description of the eight models fitted. 
+
+**Table 1 ** 
+```{r }
+library(pander)
+
+window_table <- read_csv('../output/climate_window_descriptions.csv')
+
+window_table$seasons[ is.na(window_table$seasons) ] <- 'none'
+
+description <- c('current spring', 'last two springs', 'last three springs', 'current spring, last summer', 'current spring, last summer, last fall', 'last three springs, last two summers', 'last three springs, last two summers, last two falls', 'no climate')
+
+window_table <- 
+  window_table %>% 
+  rename('model' = climate_window ) %>% 
+  rename('window' = seasons) %>% 
+  mutate(description = description) 
+
+window_table %>% pander()
+
+```
+
+### Statistical models of vital rates
+
+In additional to the seasonal climate covariates described above, statistical vital rate models included additional covariates for plant size and local competition. We model the survival probability of an individual genet as a function of genet size, the neighborhood-scale crowding experienced by the genet from conspecific or heterospecific genets, temporal variation among years, and permanent spatial variation among groups of quadrats ('group'; here means a set of nearby quadrats located within one pasture or grazing exclosure). 
+
+Formally, we modeled the survival probability, $S$, of a genet from time $t$ to $t+1$ as
+
+$\mbox{logit}(S_{g,t+1}) = \varphi_{g}^S + \gamma_{t}^S + \beta[1]^S_{t} small + \beta[2]_{t}^S u + \omega_{intra}^S w_{intra} + \omega_{inter}^S w_{inter}$
+
+where $\varphi^S$ is the spatial group dependent intercept, $\gamma^S$ is a year-effect, $\beta[1]^S$ gives the effect of the categorical variable $small$ which describes whether a genet is below a measurement threshold and $\beta[2]^S$ gives the effect of log genet size, $u$. $\omega^S_{inter}$ and $\omega^S_{inter}$ are an intra- and interspecfic crowding coefficients respectively and $w_{intra}$ and $w_{inter}$ are distance weighted measures of local intraspecific crowding interspecific crowding. In the climate models, three additional covariates are included for the effects of temperature soil moisture and their interaction.  
+
+Our growth model has a similar structure. The change in genet size from time $t$ to $t+1$, conditional on survival, is given by:
+
+$u_{g,t+1} = \varphi_{g}^G + \gamma_{t}^G + \beta[1]^G_{t} small_{t} + \beta[2]_{t}^G u_{t} + \omega_{intra}^G W_{intra} + \omega_{inter}^G W_{inter}$, 
+
+where the variables are as above for survival except for growth.  
+
+### Intra- and interspecific crowding 
+
+Although the main focus of the current analysis the effects of soil moisture and temperature, each model included the effects of inter- and intra-specific competition in our vital rate models.  We model the crowding experienced by a focal genet as a function of the distance to and size of neighbor genets. These effects are described in detail in previous work (@teller_linking_2016, @adler_weak_2016). Briefly, we model the crowding experienced by the focal genet by neighbors of species $j$ as the sum of neighbor areas across a set of concentric annuli, $k$, centered at the focal genet,
+
+$w_{j,k} = F_{j}(d_{k})A_{j,k}$, 
+
+where $F_{j}$ is the competition kernel for competitor species $j$ (described below), 
+$d_{k}$ is the average of the inner and outer radii of annulus $k$, 
+and $A_{j,k}$ is the total area of genets of species $j$ in annulus $k$ around the focal genet. The total crowding on the genet exerted by species $j$ is
+
+$w_{j}  =\sum_k {w_{j,k}} $
+
+For each target species in our analyses we only included two categories of crowding, intraspecific and interspecific.  Interspecific crowding was found by summing the crowding ($w_{j}$) across all interspecific species. 
+
+We assume that competition kernels $F_{jm}(d)$ are non-negative and decreasing, so that distant plants have less effect than close plants. Otherwise, we let the data dictate the shape of the kernel by fitting a spline model 
+using the methods of Teller et al. (2016). We used data from all historical plots and contemporary control-treatment plots to estimate the competition kernels and these are described in more detail in (@adler_weak_2016). 
+
+Once we had estimated the competitions kernels, we used them to calculate the values of $w_{intra}$ and $w_{inter}$ for each individual, and fit the full survival and growth regressions, which include the competition coefficients, $\omega_{intra}$ and $\omega_{inter}$. 
+
+### Recruitment 
+
+We model recruitment at the quadrat level. We assume that the number of individuals, $y$, of species $j$ recruiting at time $t+1$ in the location $q$ follows a negative binomial distribution:
+\begin{equation}
+y_{jq,t+1}= NegBin(\lambda_{jq,t+1},\theta) 	   
+\label{eqn:recrDataModel}
+\end{equation}
+where $\lambda$ is the mean intensity and $\theta$ is the size parameter. In turn, $\lambda$ depends on the composition of the quadrat in the previous year:
+\begin{equation}
+\lambda_{jq,t+1} = C'_{jq,t} \exp{\left(\varphi_{jg}^R + \gamma_{j,t}^R + 
+\left \langle \boldsymbol{\omega}^R , \boldsymbol{\sqrt{C'}_{q,t}} \right \rangle \right) }
+\label{eqn:recrProcessModel}
+\end{equation}
+where the superscript $R$ refers to Recruitment, $C'_{jq,t}$ is the 'effective cover' (cm$^2$) of species $j$ in quadrat $q$ at time $t$, $\varphi$ is a group dependent intercept, $\gamma$ is a random year effect, $\boldsymbol{\omega}$ is a vector of coefficients that determine the strength of intra- and interspecific density-dependence, and $\boldsymbol{C'}$ is the vector of ``effective'' cover of each species in the community. Following previous work (@adler_coexistence_2010), we treated year as a random factor allowing intercepts to vary among years. 
+   
+Because plants outside the mapped quadrat could contribute recruits to the focal quadrat or interact with plants in the focal quadrat, we estimated effective cover as a mixture of the observed cover, $C$, in the focal quadrat, $q$, and the mean cover, $\bar{C}$, across the spatial location, $g$, in which the quadrat is located: $C'_{jq,t}=p_j C_{jq,t}+(1-p_j) \bar{C}_{jg,t}$, where $p$ is a mixing fraction between 0 and 1 that was estimated as part of fitting the model.
+
+## Model fitting and model selection
+
+We fit separate vital rate models for each species and each set of climate covariates described above using Hamiltonian-Markov Chain Monte Carlo (HMCMC) simulations in the programs STAN 10.1 and rStan (**). The priors and model code are described more completely in appendix A. Each model was run for 2,000 iterations with four chains. Convergence was observed graphically for all parameters, and confirmed by assessing the split $\widehat{R}$ statistic which at convergence is equal to one. 
+
+We used K-fold cross validation within the training dataset to select the set of climate covariates for each species that best predicted interannual variation in demographic rates.  We implemented cross validation by assigning each year of the validation dataset to one of ten groups.  These were assigned so that each of the 10 groups had roughly equal numbers of years and observations.
+
+We fit the model to the entire training dataset minus the Kth group.  We then used the fitted model to predict the data in the Kth group.  We assessed accuracy of the predictions by calculating the log-posterior predictive density (LPPD) and mean squared error (MSE) of the predictions versus the held out observations.  We repated this process for each of the 10 held out groups and found the average LPPD and MSE across the 10 groups to find the overall predictive accuracy for the model.
+
+MSE was calculated as $MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - E(y_i|\theta))^2$, where $y_i$ is the outcome of observation $i$ and $E(y_i|\theta)$ gives the expected outcome given the parameters in the model $\theta$. The MSE is easy to interpret, but is not always appropriate for models fit with non-normal error structures (@gelman_understanding_2014). LPPD offers a more general statistic for assessing model predictions (@gelman_understanding_2014). The lppd for a given model is defined as $LPPD = \sum_{i=1}^{n} log \int p(y_i| \theta)p_{post}(\theta) d\theta$, where the integral on the right side gives the probability of observing the outcome $y$ at each data point $i$ given the full posterior distribution of the parameters in the model $p_{post}(\theta)$. In practice we computed the lppd from the posterior simulations generated by STAN as $\widehat{LPPD} = \sum_{i=1}^{n} log \left(\frac{1}{S} \sum_{s=1}^{S} p(y_i | \theta^S) \right)$, where the summation of $p(y_i|\theta^S)$ gives the total probability of observing the the actual response $y_i$ given the simulated posterior distribution $\theta^S$ across the full set of model simulations $S$.  The log of this sum is then averaged across the set of all observations $i$.  Higher lppd scores indicate that the model better predicts the observations.
+
+## Evaluating predictive accuracy on the validation data 
+
+K-fold cross validation provides a means of model selection based on predictive ability within the training data.  Ultimately we wanted to test how well the models we selected above for each species and vital rate would predict truly out of sample data collected in the modern day precipitation experiment from 2011 to 2016.  To do this, we refitted the null model and the most accurate climate model for each species and vital rate to the entire training dataset and then used it to generate one-step-a-head predictions for each year of the validation data. We then evaluated model predictive cabability by calculating the LPPD and MSE for each species, vital rate, and treatment (drought, irrigated, and ambient). For each vital rate and species we tested whether the LPPD of the best climate model was higher than (indicating more accurate out of sampel predictions) than the null model including no climate covariates.  
+
+## Individual based model 
+
+The statistical vital rate models described above allow us to evaluate whether interannual climate variation affected growth, survival and recruitment separately. But the overall population response ultimately depends on the integrated effects of treatment or soil moisture on all three vital rates.  To evaluate whether the climate models could predict the responses of these species in the drought and irrigation experiment at the level of population growth we used an individual-based model (IBM) to compare observed and predicted changes in population size from one year to the next. 
+
+To simulate changes in cover in each quadrat from year $t$ to year $t+1$, we initialized the IBM with the observed genet sizes and locations of the four focal species observed in year $t$ in each quadrat. For every individual genet in a quadrat, we projected its size and survival probability in the next year using the growth and survival models and the appropriate crowding and soil moisture or treatment covariates for that year and quadrat.  Likewise we projected the number of new recruits in the quadrat in the next year using the recruitment model. We calculated the expected cover in year $t+1$ as the total area of new recruits, plus the sum of the predicted area of each existing plant at time $t+1$ multiplied by each plant's expected survival probability from time $t$ to $t+1$. 
+
+We generated predictions using 1000 samples from the posterior distributions of each model parameter which allowed us to carry forward all of the uncertainty of the fitted vital rate models into our cover predictions. Because we were interested in comparing model predictions to observations, and were not interested in the effects of demographic stochasticity, we used a deterministic version of the models (e.g., recruitment is the $\lambda$ of (\ref{eqn:recrProcessModel}), rather than a random draw from a negative binomial distribution with a mean of $\lambda$).
+
+After generating predictions for each year from the climate and no climate models, we found the predicted quadrat-level changes in cover as $log(Cover_{t+1}/Cover_{t})$.
+
+
+All data and R code necessary to reproduce our analysis will be deposited in the Dryad Digital Repository once the manuscript is accepted. The current version of the computer code is available at https://github.com/pbadler/ExperimentTests/tree/master/precip and the data are available at https://bitbucket.org/ellner/driversdata. 
+
+# Results
+
+## Effects on soil moisture
+
+Our treatments successfully changed soil moisture in the experimental plots in the directions expected (fig. \ref{fig:spotVWC}). Spring spot measurements of soil moisture from all the plots showed that on average the drought plots were roughly 50\% drier, while irrigated plots were roughly 40\% wetter than ambient conditions (table \ref{table:spotVWC}).
+  
+The continuously recorded soil moisture data also showed treatment effects, but these were weaker on average than the spot measurements and depended on season and recent rainfall (table \ref{table:soil_moisture_model}; fig \ref{fig:dailyVWC}). We saw weaker effects during the spring than during the fall and summer: the drought plots were about 20-30\% drier than ambient in the fall and summer but only 7 to 14\% drier during the spring, while the irrigated plots were 30\% wetter during the fall and summer but only 20-25\% wetter during the spring.  Treatment differences were slightly larger during rainy periods, especially in the spring (rainfall effect in table \ref{table:soil_moisture_model}). We did not find evidence that the drought shelters and the irrigation treatments consistently affected air temperature at 30 cm above the plots.  
+
+The SOILWAT model predicted average monthly soil volumetric water content of between 10 ml/ml and 15 ml/ml each month, with the month of April being the wettest and the month of July, August and September being the driest on average. Annual variation in seasonal soil moisture for each year was positively correlated with seasonal precipitation and negatively correlated with seasonal temperature. During the course of the experiment, SOILWAT reproduced much of the daily variation observed in soil moisture recorded by our automatic data loggers, but the average soil moisture predicted by SOILWAT was about 5 ml/ml higher than the soil moisture content observed in the field.  
+
+After adjusting the SOILWAT predictions by the observed drought and irrigation effects we found that soil in the drought plots was much drier than the historical average: the summer of 2012 and 2013, the fall of 2013, and the spring and winter of 2014 fell below the 5th percentile limit for drought in the historical period (fig \ref{fig:seasonalVWC}). Soil moisture in our irrigated plots was generally above the historical average but conditions never exceeded the 90th percentile for soil moisture in the historical period (fig \ref{fig:seasonalVWC}). 
+
+While we did not experimentally manipulate temperature, annual temperature during the validation period (2011 to 2016) was much warmer than the historical average over the period of training data. XX  
+
+## Effects on cover and vital rates
+
+The cover of *Hesperostipa* and *Pseudoroegnaria* fell significantly in the drought plots from 2011 to 2016 (tables \ref{table:changeHECO}, \ref{table:changePSSP}; fig \ref{fig:coverChange}). The cover of *Poa* showed a slight decrease in the drought plots and an increase in the irrigated plots but these changes were not significant (table \ref{table:changePOSE}).  In contrast to the grasses, the cover of *Artemisia* increased slightly in all three treatments (fig \ref{fig:coverChange}). 
+
+## Model selection
+
+We ranked each of the vital rate models for each of the species based on out of K-fold cross validation using LPPD (see table 2). Only in the case of *Poa* growth did we find that the null model was ranked first.  For the other species, some combination of spring, summer and fall climate was a better predictor of growth and survival than a model without climate covariates. Climate window 3 (last three springs) provided the best fit for survival of *Artemisia* survival and *Poa*.  Climate window 4 (current spring, last summer) provided the best fit for *Poa* and *Pseudoroegnaria* growth.  Among the survival models, LPPD and MSE were significantly negatively correlated within species, indicating that higher LPPD scores were associated with lower MSE as expected.  However, among the growth models, LPPD and MSE were not correlated as expected.  
+
+** Table 2 Model rank based on K-fold cross validation within training data.** 
+```{r }
+library(tidyverse)
+library(loo)
+
+model_ranks <- read_csv('../output/stan_model_ranks.csv') %>% 
+  left_join(window_table, by = c('climate_window' = 'model')) %>% 
+  arrange(spp, vr, model_rank ) %>%
+  select(spp, vr, model_rank, climate_window, oos_lppd, oos_mse, description) 
+
+model_ranks %>% pander()
+
+```
+
+## Climate effects on growth, survival and recruitment 
+
+The response of the four species to soil moisture and temperature and their interaction varied considerably between species and vital rates. Artemisia growth and survival were predicted to decrease in response to soil moisture, but only when temperatures were average or below average (Figure 1). Hesperostipa survival was predicted to respond positively to soil moisture (Figure 1).  Poa growth was predicted to respond positively to soil moisture only when temperatures were above average. In contrast, Poa survival was predicted to respond negatively to soil moisture, but only when temperature was below average (Figure 1).  Pseudoroegneria growth was predicted to respond positively to soil moisture in warm years but negatively to soil moisture in cold years (Figure 1).  Pseudoroegneria survival was predicted to respond positively to soil moisture in years with average or above average temperatures (Figure 1). 
+
+
+## Predictive accuracy
+
+We tested the top ranked vital rate model for each species by using it to generate predictions for each data point of the validation data.  We also generated predictions for each data point of the validation data using the null models for each species and vital rate which contained no climate covariates.  In the case of Hesperostipa growth, the top ranked model was also the null model.  We summarised predictive accuracy using MSE and LPPD. 
+
+## Predicting population growth with IBM
+
+In addition to testing predictions for each vital rate each year, we also used the IBM described in the methods to generate one-step-a-head predictions for total species cover in each plot in each year.  Again we generated IBM predictions using the top ranked demographic models, or NULL models.  In the case of Hesperostipa, the top ranked growth model was the null model.  We compared the predicted cover to observed cover and evaluated predictive accuracy using MSE. 
+
+# Discussion
+
+Our experiment showed that observational data on the response of plant populations to interannual climate variation can indeed help us predict the direction of species responses to experimental climate manipulations (fig \ref{fig:parPredictions}). The historical climate-demography correlations helped predict the direction of experimental responses even though adding climate parameters to the demographic models only improved vital rate predictions for half of the models (fig \ref{table:overallPreds}). This should give us some hope that even when climate effects in demographic models fit to observational data are weak or not significant, they may contain useful qualitative information on the direction of climate effects in the future. 
+
+## Comparison of experimental and natural climate effects
+While previous studies in this system used the observational data to describe the effects of climate on demography and survival, this is the first study to demonstrate effects of climate experimentally. While previous studies of this system fit a variety of climate effects and used different modeling approaches, we see many points of similarity between these studies in the responses of the four dominant species to precipitation ((@chu_direct_2016),(@dalgleish_climate_2010), (@adler_forecasting_2012)). First, in all three studies the strongest positive effects of precipitation among the four species are reported for *Hesperostipa*; this matches the negative effects of our drought experiment on this species (fig \ref{fig:coverChange}). This effect is driven by a negative growth and survival response to drought (fig \ref{fig:growthTreat}, \ref{fig:survivalTreat}). On the other hand, if we had only conducted an irrigation experiment our results may not have shown this consistency with previous work as *Hesperostipa* showed no positive response to irrigation. Previous studies also reported positive effects of precipitation on the other grasses, *Poa* and *Pseudoroegnaria*. Again our results are consistent with this result: drought led to declines in cover of *Pseudoroegnaria*, \ref{fig:coverChange}, and in the growth and survival of *Poa* (figs \ref{fig:growthTreat}, \ref{fig:survivalTreat}). As for the *Hesperostipa* the magnitudes of drought effects were greater than the irrigation effects on these grasses. 
+
+The effects of precipitation on *Artemisia* are more complicated. Previous research reported negative direct effects of precipitation on this species ((@adler_forecasting_2012), (@chu_direct_2016)). This effect has always seemed odd because it is hard to imagine why precipitation would have a direct negative effect on a species in this dry ecosystem. But again the largely positive (but size dependent) effects of drought treatments on *Artemisia* growth should give us more confidence in the negative effects of precipitation shown in the historical data. These studies also report relative strong indirect effects of precipitation on *Artemisia* mediated by its competition with grasses. It is possible that some of the positive effect on *Artemisia* growth in our drought plots is the result of reduced grass cover (fig \ref{fig:coverPred}; (@chu_direct_2016)). However, our growth model includes interspecific crowding and so should take into account any changes in grass abundance that could be driving a positive response from *Artemisia*. This leaves us with the question of why this species would show a positive direct response to drought. Although there is some evidence that saturated soils in the spring are detrimental for big sagebrush (*A. tridentata*), a closely related species (@sturges_response_1989,germino_desert_2014), soil saturation would conservatively seem to require soils to be above 30 or 40\% volumetric water content for several weeks, something that we did not observe (fig \ref{fig:dailyVWC}). Another possible explanation is that our drought treatments reduced snow cover in the winter and early spring, an effect that has been shown to benefit related sagebrush species in other ecosystems (@perfors_enhanced_2003). 
+
+Overall we were somewhat surprised by the weak effects that reducing water availability by 50\% and increasing water availability by 150\% had in this arid system. Cross-biome studies of the relationship between precipitation and ANPP generally show that arid systems are highly sensitive to water limitation (@huxman_convergence_2004). We have two explanations for the seemingly weak effects of precipitation we observed on demography. First, we measure the size of the pernnial bunchgrasses in this system by their basal cover, which may not have a strong relationship with their annual production. It is likely that we would find larger effects of precipitation on these grasses if we had a more complete measurement of aboveground biomass. Moreover, much of the growth of these species may be going into roots. 
+
+Another explanation for the weak effects of precipitation are that perennial species in this cold desert ecosystems are well adapted to tolerate drought, either through escaping drought by growing early in the year, or by avoiding drought stress later in the year through high water use efficiency (@bazzaz_physiological_1979,franks_plasticity_2011). Indeed our soil moisture data generally show a pulse of soil moisture in the spring when many grasses are actively growing (fig \ref{fig:dailyVWC}). Likewise, *Artemisia* is more deeply rooted than the grasses and able to continue its growth throughout the growing season by drawing from deeper soil water (@germino_desert_2014). The adaptations of native perennial plants in cold deserts could make them less sensitive to water availability than species in a more mesic ecosystem. 
+
+## Can the past predict the future?
+Our second research question was whether we could use long term observational data on species response to precipitation to predict the response of each species to the experiment. Using the IBM, we to generate predicted changes in population size for each year, we found that climate model predictions were indeed better than the no climate models for two species: *Pseudoroegnaria* and *Poa* (table \ref{table:corPGR}). In the drought treatment our one step ahead cover predictions for *Hesperostipa* and *Poa* were also better than the no climate model. Moreover, we also found that climate models produced better predictions of species vital rates for half of the species/vital rate combinations we tested (table \ref{table:overallPreds}). The rate of overall improvement in predictive ability produced by the climate models over the no climate models was similar to the results reported by (@adler_can_2013) who also reported improved population-level predictions for half of the species predicted. Likewise, in a within sample cross-validation analysis, (@tredennick_we_2016) found that including climate covariates improved population level predictions for two out of four species in a mixed grass prairie in Montana.  
+
+We also compared the treatment parameters from the treatment model fit to the experimental data to the treatment parameters predicted by the climate model fit only to the observational data \ref{fig:parPredictions}. Among all the climate effects we predicted and observed, there were only four cases where vital rate predictions and observations were both significantly different from zero (fig \ref{fig:parPredictions}) and three of these cases we successfully predicted the direction of the treatment effects. However, for *Poa* recruitment we predicted a positive response of irrigation, but observed a negative response (figs \ref{fig:parPredictions}). From a statistical standpoint this is our arguably our greatest error in prediction. However, recruitment decreased in both the drought and irrigation plots for *Poa* and also for *Pseudoroegnaria* (fig \ref{fig:recruitmentTreat}). So its likely the decrease in *Poa* recruitment in the irrigated plots was due to underlying differences in the set of experimental plots from the historical control plots rather than the precipitation treatments.  
+
+The drought effects we observed on the three grasses were often stronger than the effects we predicted, while the irrigation effects observed were often weaker than predicted (figs \ref{fig:parPredHECOGrowth}, \ref{fig:parPredHECOSurvival}, \ref{fig:parPredPOSEGrowth}, \ref{fig:parPredPOSESurvival}, \ref{fig:parPredPSSPGrowth}, \ref{fig:parPredPSSPSurvival}). In this water limited system, we expected that experimental irrigation would lead to increases in plant performance, but we saw few cases where irrigation benefited any of the plants. A pattern qualitatively similar to this shows up in both natural and experimental data comparing precipitation to ANPP: decreases in grassland ANPP induced by drought are often of greater magnitude than increases in ANPP induced by experimental irrigation or by above average precipitation ((@hsu_anticipating_2014,gherardi_enhanced_2015)). If we had fit our growth and survival models with a non-linear function for soil moisture, perhaps informed by more mechanistic understanding of water limitation on the physiology of these plants, we may have made more accurate predictions of the drought and irrigation effects (@ehrlen_advancing_2016).
+
+## Conclusion 
+
+Our results give us more confidence that observational data can be used to detect and predict the effects of annual soil moisture variation on sagebrush steppe plants. This should encourage more researchers to try and use observational data to predict population response to climate in both experimental and natural settings (@houlahan_priority_2016,ehrlen_advancing_2016). Nevertheless, our success at predicting the short-term response of two out of four species to a simple precipitation manipulation is not likely to impress applied ecologists and policymakers who often need accurate predictions for the effects of climate change in large complex systems. Clearly more work is needed to learn how to accurately predict the ecological responses of species to climate change. Towards that goal, perhaps the best way forward is to conduct more tests like this one.   
+  
+# Acknowledgements 
+
+Funding was provided by NSF grants DEB-1353078, and DEB-1054040 to PBA, an NSF GRFP award to AK, and by the Utah Agricultural Experiment Station (get journal paper number). The USDA-ARS Sheep Experiment Station generously provided access to historical data and the field experiment site. Laureano Gherardi provided us with valuable advice in constructing the rain-out and irrigation experiment. 
+
+# Tables 
+
+\input{spot_measurements}
+\input{soil_moisture_model}
+\input{overall_cover_change_modified}
+\input{strong_correlations}
+\input{overall_prediction_score}
+\input{pgr_predictions}
+
+```{r }
+
+test_cor <- 
+  model_ranks %>% 
+  select( -model_rank) %>% 
+  group_by( spp, vr ) %>% 
+  summarise( out = list( cor.test( oos_lppd, oos_mse)) ) 
+
+names(test_cor$out) <- paste0(test_cor$spp, test$vr)
+test_cor$out
+```
+
+# Figures 
+
+![**Figure X Soil moisture in the upper 5 cm of drought and irrigated plots compared to ambient controls. Soil moisture was measured at six locations around each plot at five different dates during the spring. Control plots were nearby areas of experiencing ambient soil moisture. Box plots show the median soil moisture and the interquartile range.  Dots show individual soil moisture measurements. Readings of volumetric soil moisture less than zero were occasionally obtained in very dry soil.**](../figures/VWC_spot_measurements.png)
+
+![**Figure X Average soil moisture in the control, drought, and irrigation treatments during each year of the experiment.  Soil moisture was monitored in four drought plots, four irrigated plots and four ambient control plots. Two sensors were installed at 5 cm depth at each plot and two at 25 cm and data was logged every 2 hours.**](../figures/avg_daily_soil_moisture.png)
+
+
+![**Figure X Average seasonal soil moisture in the control, drought, and irrigation treatments during each year of the experiment. The dashed gray lines give the 5th percentile and 95th percentile limits for seasonal soil moisture in the historical record (1929 to 2010).**](../figures/modern_soil_moisture_comparison_compared_to_historical.png)
+
+
+
+![**Figure X Log change in cover in each of the experimental plots from the pre-treatment monitoring in 2011 to the last year of the experiment in 2016. Box plots show the median cover change and the interquartile range. ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*.**](../figures/start_to_finish_cover_change.png)
+
+
+
+![**Figure 1. Predicted direction of climate effects on survival and recruitment. Colors show the direction of the demographic response, warmer color show regions where the predicted response is positive (faster growth or higher survival), blue regions show areas where the predicted response is negative (slower growth or lower survival). The top model refers to the model with the lowest LPPD on the K-fold cross validation data.  Different species and vital rates may have included different climate windows (see Table 2). The annual soil moisture variable and annual temperature variable used in each model are mean centered and scaled by their standard deviation across all training and validation data. The gray points show temperature and moisture values of years within the training dataset.  The top model for Hesperostipa growth did not include climate so no values are shown.** ](../figures/top_model_responses.png)
+
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{treatment_effect_growth}
+	\caption{Parameter estimates for the effects of treatment on growth of all four species. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero. Size by treatment interactions were only fit for ARTR, and POSE. Plant size was centered on mean size and scaled by its standard deviation. ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:growthTreat}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{treatment_effect_survival}
+	\caption{Parameter estimates for the effects of treatment on survival of all four species. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero. Size by treatment interactions were only fit for POSE. Plant size was centered on mean size and scaled by its standard deviation.  ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:survivalTreat}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{treatment_effect_recruitment}
+	\caption{Parameter estimates for the effects of treatment on recruitment of all four species. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.  ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:recruitmentTreat}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{climate_effect_growth}
+	\caption{Parameter estimates for the selected seasonal soil moisture covariates on the growth of all four species. Parameters are ordered chronologically from most recent to the current growing season on the right to most distant on the left. Red parameters show size x climate interaction effects. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.  ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:climateGrowth}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{climate_effect_survival}
+	\caption{Parameter estimates for the selected seasonal soil moisture covariates on the survival of all four species. Parameters are ordered chronologically from most recent to the current growing season on the right to most distant on the left. Red parameters show size x climate interaction effects. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.  ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:climateSurvival}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{climate_effect_recruitment}
+	\caption{Parameter estimates for the selected seasonal soil moisture covariates on the recruitment of all four species. Parameters are ordered chronologically from most recent to the current growing season on the right to most distant on the left. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.  ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*. }
+	\label{fig:climateRecruitment}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{parameter_predictions}
+	\caption{The treatment effects predicted by the climate model compared to the treatment effects observed for the intercept parameters (left side) and size by climate/treatment effects (right side). Parameters from all species and vital rates are shown together. The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016).  Treatment parameters that were both observed and predicted to be significantly different from zero are shown with the "*" symbol. The correlation between predicted and observed parameters is given on each panel. *Poa* recruitment was predicted to be positively affected by the irrigation treatment but was in fact negatively affected. The other significant effects were in the correct direction. We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredictions}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{predicted_and_observed_cover}
+	\caption{Observed average cover per quadrat in the experimental and control plots and one step ahead cover predictions from the climate model. Cover predictions for each year are generated from the IBM based on the observed distribution of plants in each quadrat in the current year. Quadrat cover was not predicted for the first year of the experiment in 2011.  Note the different cover scales for ARTR and the three grass species. ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*.}
+	\label{fig:coverPred}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{ARTR_predicted_pgr_comparison}
+	\caption{Observed and predicted one step ahead log change in *Artemisia* cover in the experiment. Changes in cover predicted by the climate model are shown on the left and those predicted by the no climate model are shown on the right. Correlations coefficients between predictions and observations and MSE are shown for each treatment and model. Gray line shows 1:1 line.}
+	\label{fig:pgrARTR}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{HECO_predicted_pgr_comparison}
+	\caption{Observed and predicted one step ahead log change in *Hesperostipa* cover in the experiment. Changes in cover predicted by the climate model are shown on the left and those predicted by the no climate model are shown on the right. Correlations coefficients between predictions and observations and MSE are shown for each treatment and model. Gray line shows 1:1 line.}
+	\label{fig:pgrHECO}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{POSE_predicted_pgr_comparison}
+	\caption{Observed and predicted one step ahead log change in *Poa* cover in the experiment. Changes in cover predicted by the climate model are shown on the left and those predicted by the no climate model are shown on the right. Correlations coefficients between predictions and observations and MSE are shown for each treatment and model.Gray line shows 1:1 line.}
+	\label{fig:pgrPOSE}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{PSSP_predicted_pgr_comparison}
+	\caption{Observed and predicted one step ahead log change in *Pseudoroegnaria* cover in the experiment. Changes in cover predicted by the climate model are shown on the left and those predicted by the no climate model are shown on the right. Correlations coefficients between predictions and observations and MSE are shown for each treatment and model.Gray line shows 1:1 line.}
+	\label{fig:pgrPSSP}
+\end{figure}
+
+
+# Appendix 
+
+## Additional Tables
+
+\input{treatment_prediction_score}
+
+
+## Additional Figures 
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_ARTR_growth}
+	\caption{Comparison of treatment effects predicted and observed for *Artemisia* growth.  Upper figure shows each parameter estimate separately while the lower figure shows the effect of treatment as a function of plant size.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredARTRGrowth}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_HECO_growth}
+	\caption{Comparison of treatment effects predicted and observed for *Hesperostipa* growth.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredHECOGrowth}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_POSE_growth}
+	\caption{Comparison of treatment effects predicted and observed for *Poa* growth.  Upper figure shows each parameter estimate separately while the lower figure shows the effect of treatment as a function of plant size.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPOSEGrowth}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_PSSP_growth}
+	\caption{Comparison of treatment effects predicted and observed for *Pseudoroegnaria* growth.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPSSPGrowth}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_ARTR_survival}
+	\caption{Comparison of treatment effects predicted and observed for *Artemisia* survival.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredARTRSurvival}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_HECO_survival}
+	\caption{Comparison of treatment effects predicted and observed for *Hesperostipa* survival.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredHECOSurvival}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_POSE_survival}
+	\caption{Comparison of treatment effects predicted and observed for *Poa* survival.  Upper figure shows each parameter estimate separately while the lower figure shows the effect of treatment as a function of plant size.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPOSESurvival}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_obs_treatment_PSSP_survival}
+	\caption{Comparison of treatment effects predicted and observed for *Pseudoroegnaria* survival.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPSSPSurvival}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_ob_treatment_ARTR_recruitment}
+	\caption{Comparison of treatment effects predicted and observed for *Artemisia* recruitment.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredARTRRecruitment}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_ob_treatment_HECO_recruitment}
+	\caption{Comparison of treatment effects predicted and observed for *Hesperostipa* recruitment.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredHECORecruitment}
+\end{figure}
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_ob_treatment_POSE_recruitment}
+	\caption{Comparison of treatment effects predicted and observed for *Poa* recruitment. The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPOSERecruitment}
+\end{figure}
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{pred_v_ob_treatment_PSSP_recruitment}
+	\caption{Comparison of treatment effects predicted and observed for *Pseudoroegnaria* recruitment.  The observed treatment effects come from the treatment model fitted to all the data including the five years of the experiment.  The predicted parameters come from the climate model fitted to all years of observational data but do not include the five years of the experiment (2011 to 2016). We assessed a parameter as significant when the 95\% Bayesian credible intervals did not overlap zero.}
+	\label{fig:parPredPSSPRecruitment}
+\end{figure}
+
+

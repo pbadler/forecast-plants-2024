@@ -1,0 +1,32 @@
+
+\begin{table}
+\caption{Estimated parameters from a mixed effects model fit to the spring soil moisture data. Parameter with s.e. are shown. Intercept gives soil moisture in ambient controls.}
+\begin{center}
+\begin{tabular}{l c }
+\hline
+ & Model 1 \\
+\hline
+(Intercept)                  & $8.81^{***}$  \\
+                             & $(1.54)$      \\
+TreatmentDrought             & $-3.97^{***}$ \\
+                             & $(0.45)$      \\
+TreatmentIrrigation          & $3.26^{***}$  \\
+                             & $(0.45)$      \\
+\hline
+AIC                          & 3191.87       \\
+BIC                          & 3222.92       \\
+Log Likelihood               & -1588.93      \\
+Num. obs.                    & 624           \\
+Num. groups: plot            & 24            \\
+Num. groups: PrecipGroup     & 8             \\
+Num. groups: date            & 5             \\
+Var: plot (Intercept)        & 0.45          \\
+Var: PrecipGroup (Intercept) & 0.23          \\
+Var: date (Intercept)        & 11.24         \\
+Var: Residual                & 8.90          \\
+\hline
+\multicolumn{2}{l}{\scriptsize{$^{***}p<0.001$, $^{**}p<0.01$, $^*p<0.05$}}
+\end{tabular}
+\label{table:spotVWC}
+\end{center}
+\end{table}
