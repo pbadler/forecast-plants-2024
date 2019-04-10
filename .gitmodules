@@ -1,7 +1,3 @@
 [submodule "lib/driversdata"]
 	path = lib/driversdata
 	url = https://bitbucket.org/ellner/driversdata
-[submodule "lib/Rsoilwat_v31"]
-	path = lib/Rsoilwat_v31
-	url = https://github.com/DrylandEcology/rSOILWAT2
-	branch = v1.2.4
