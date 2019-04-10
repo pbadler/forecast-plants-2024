@@ -1,3 +1,6 @@
 [submodule "lib/driversdata"]
 	path = lib/driversdata
 	url = https://bitbucket.org/ellner/driversdata
+[submodule "lib/Rsoilwat31"]
+	path = lib/Rsoilwat31
+	url = https://github.com/akleinhesselink/rSOILWAT2
