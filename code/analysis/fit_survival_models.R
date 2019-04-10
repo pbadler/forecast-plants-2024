@@ -10,7 +10,7 @@ vr <- 'survival'
 stan_model_file <- 'code/analysis/survival.stan'
 species <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
-testing <- T
+testing <- F
 if( testing ){ 
   
   k <- 2                      ### number of folds 
