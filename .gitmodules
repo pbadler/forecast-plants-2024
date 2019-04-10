@@ -4,3 +4,4 @@
 [submodule "lib/Rsoilwat31"]
 	path = lib/Rsoilwat31
 	url = https://github.com/akleinhesselink/rSOILWAT2
+	branch = Rsoilwat31
