@@ -3,11 +3,7 @@
 rm(list = ls()) 
 
 library( tidyverse) 
-library(zoo)
-library(MASS)
 
-myVWC <- readRDS('data/decagon_data_with_station_data.RDS')
-swVWC <- read.csv('data/daily_VWC.csv') # generated from ExtractData_3Runs.R
 daily_clim <- readRDS('data/daily_station_dat_rainfall.RDS')
 seasons <- read.csv('data/season_table.csv')
 spotVWC <- readRDS('data/spring_spot_measurements.RDS')

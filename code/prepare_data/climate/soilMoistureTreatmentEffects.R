@@ -10,9 +10,12 @@ library(emmeans)
 library(texreg)
 library(xtable)
 
-myVWC <- readRDS('data/decagon_data_with_station_data.RDS')
-swVWC <- read.csv('data/daily_VWC.csv')
-daily_clim <- readRDS('data/daily_station_dat_rainfall.RDS')
+swVWC <- read.csv('data/daily_VWC.csv')                       # soilwat output 
+spotVWC <- readRDS('data/temp_data/spotVWC.RDS')              # spot check soil moisture
+
+myVWC <- readRDS('data/decagon_data_with_station_data.RDS')   # cleaned decagon data 
+daily_clim <- readRDS('data/daily_station_dat_rainfall.RDS')  # climate station rainfall
+
 seasons <- read.csv('data/season_table.csv')
 
 # --------------------------------------------------------------------------------------#
@@ -59,7 +62,6 @@ df_soil_moist <- merge(df_soil_moist, VWC_weights)
 df_soil_moist$type <- 'logger'
 VWC_df <- df_soil_moist
 
-spotVWC <- readRDS('data/temp_data/spotVWC.RDS')
 spotVWC$type <- 'spot'
 spotVWC$year <- strftime(spotVWC$date, '%Y')
 
