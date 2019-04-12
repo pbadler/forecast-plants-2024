@@ -1,15 +1,25 @@
 # calculate treatment effects compared to control soil moisture 
 
 rm(list = ls()) 
-
 library( tidyverse) 
 
-daily_clim <- readRDS('data/daily_station_dat_rainfall.RDS')
+# input ---------------------------------------------------- # 
 seasons <- read.csv('data/season_table.csv')
-spotVWC <- readRDS('data/spring_spot_measurements.RDS')
+
+daily_clim <- readRDS('data/daily_station_dat_rainfall.RDS') 
+  # comes from 'make_rainfall.R'
+  
+load('~/Dropbox/projects/sheepweather/data/usses_spot_sm.rda')
+  # comes from 'process_spot_measurements.R'
+
+# output ---------------------------------------------------- # 
+
+outfile <- 'data/temp_data/spotVWC.RDS'
+
+# ---------------------------------------------------- # 
 
 spotVWC <- 
-  spotVWC %>% 
+  usses_spot_sm %>% 
   mutate( month = as.numeric( strftime( date, '%m'))) %>% 
   left_join(seasons, by = 'month')
 
@@ -34,5 +44,5 @@ spotVWC <- merge( spotVWC, spot_weights)
 
 spotVWC <- spotVWC %>% mutate( simple_date = date ) 
 
-saveRDS(spotVWC, 'data/temp_data/spotVWC.RDS')
+saveRDS(spotVWC, outfile)
 
