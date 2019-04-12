@@ -349,8 +349,28 @@ swVWC <-
 
 swVWC$VWC_raw <- swVWC$VWC * Control_sd + Control_mean
 
+# make time periods --------------------------------------------------------------------
+
+p1 <- data.frame( Period = 'Modern', year = 2007:2016)
+p2 <- data.frame( Period = 'not monitored', year = 1958:2006)
+p3 <- data.frame( Period = 'Historical', year = 1925:1957)
+periods <- data.frame( rbind( p1, p2, p3 )) 
+
+# set-up aggregate seasonal variables for model ----------------------------------------#
+
+swVWC <- 
+  swVWC %>% 
+  ungroup() %>% 
+  mutate( water_year = year + lag_year ) %>% 
+  mutate( quarter = cut(month, 4, labels = paste0('Q', 1:4))) %>%
+  dplyr::select(year, quarter, month, year, season, season_label, precip_seasons, water_year, Treatment, date, VWC, VWC_raw)
+
+swVWC <- swVWC %>% left_join(periods, by = 'year')
+
+
 saveRDS(swVWC, daily_swVWC_treatment_outfile)
 
+#  Additional figures ---------------------------------------- # 
 
 pdf(
   'figures/modeled_soilwat_soil_moisture_example.pdf',

@@ -3,6 +3,8 @@
 # Make climate variables from seasonal climate 
 #
 #####################################################################################
+library(dplyr)
+library(zoo)
 
 rm(list = ls() )
 
@@ -10,6 +12,10 @@ rm(list = ls() )
 
 seasonal_clim <- readRDS('data/temp_data/seasonal_climate.RDS')
 seasonal_VWC  <- readRDS('data/temp_data/seasonal_VWC.RDS')
+
+# ------- output ------------------------------------------------------------------ 
+
+outfile = 'data/temp_data/all_clim_covs.RDS'
 
 # ------ calculate seasonal lags -----------------------------------------------------# 
 #
@@ -39,6 +45,10 @@ seasonal_VWC  <- readRDS('data/temp_data/seasonal_VWC.RDS')
 # -------------------------------------------------------------------------------------# 
 seasonal_VWC$season <- factor( seasonal_VWC$season, c('winter', 'spring', 'summer', 'fall'), ordered = T)
 seasonal_clim$season <- factor( seasonal_clim$season, c('winter', 'spring', 'summer', 'fall'), ordered = T)
+
+seasonal_clim <- 
+  seasonal_clim %>% 
+  rename("year" = YEAR)
 
 q_VWC <- 
   seasonal_VWC %>% 
@@ -73,7 +83,7 @@ q_VWC <-
 
 q_precip <- 
   seasonal_clim %>% 
-  filter( var == 'PRCP_ttl') %>%
+  filter( var == 'PRCP') %>%
   group_by(Treatment) %>% 
   arrange(Treatment, year, season) %>%
   mutate(P.f.w.sp.1 = rollsum(val, 3, align = 'right', fill = NA), 
@@ -90,7 +100,7 @@ q_precip <-
 
 q_temp <- 
   seasonal_clim %>% 
-  filter( var == 'TAVG_avg' ) %>% 
+  filter( var == 'TAVG' ) %>% 
   group_by(Treatment) %>% 
   arrange(Treatment, year, season) %>% 
   mutate( T.sp.1 = val, 
@@ -141,4 +151,4 @@ allClim <- cbind(allClim,tmp_dat)
 
 # ---- output ----------------------------------------------------------------------------# 
 
-saveRDS( allClim , 'data/temp_data/all_clim_covs.RDS')
+saveRDS( allClim , outfile ) 
