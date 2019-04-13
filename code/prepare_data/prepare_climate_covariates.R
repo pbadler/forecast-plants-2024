@@ -83,7 +83,7 @@ q_VWC <-
 
 q_precip <- 
   seasonal_clim %>% 
-  filter( var == 'PRCP') %>%
+  filter( var == 'PRCP_ttl') %>%
   group_by(Treatment) %>% 
   arrange(Treatment, year, season) %>%
   mutate(P.f.w.sp.1 = rollsum(val, 3, align = 'right', fill = NA), 
@@ -100,7 +100,7 @@ q_precip <-
 
 q_temp <- 
   seasonal_clim %>% 
-  filter( var == 'TAVG' ) %>% 
+  filter( var == 'TAVG_avg' ) %>% 
   group_by(Treatment) %>% 
   arrange(Treatment, year, season) %>% 
   mutate( T.sp.1 = val, 

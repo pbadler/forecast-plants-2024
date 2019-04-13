@@ -4,10 +4,8 @@ rm(list = ls())
 
 library(tidyverse)
 library(lme4)
-library(MASS)
 library(lsmeans)
 library(texreg)
-library(xtable)
 
 # input ---------------------------------------------------- #
 
@@ -96,7 +94,7 @@ mTreatment <-
 # select models
 
 mTreatment <-
-  stepAIC(mTreatment,
+  MASS::stepAIC(mTreatment,
           scope = list(upper = ~ . , lower = ~ 1),
           trace = T)
 summary(mTreatment)

@@ -6,15 +6,16 @@
 
 rm(list = ls() ) 
 
-library(rstan)
-library(tidyverse)
-library(zoo)
-library(texreg)
-library(xtable)
-library(gridExtra)
-library(MASS)
-library(lsmeans)
-library(lme4)
+# library(rstan)
+# library(tidyverse)
+# library(zoo)
+# library(texreg)
+# library(xtable)
+# library(gridExtra)
+# library(MASS)
+# library(lsmeans)
+# library(lme4)
+# library(sheepweather)
 
 # run data preparation files first --------------------------- # 
 
