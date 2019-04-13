@@ -1,5 +1,7 @@
-# save plotting theme to be used on all plots 
+rm(list = ls())
+library(tidyverse)
 
+# save plotting theme to be used on all plots 
 
 my_theme <- 
   theme_bw () + 

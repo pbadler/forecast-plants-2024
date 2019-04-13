@@ -5,6 +5,7 @@
 #####################################################################################
 
 # These retrieve and aggregate all the climate data 
+library(sheepweather)
 
 source('code/prepare_data/make_rainfall.R')
 source('code/prepare_data/aggregate_spot_VWC.R')
