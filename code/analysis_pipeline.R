@@ -21,7 +21,7 @@ rm(list = ls() )
 
 source('code/figure_scripts/save_plot_theme.R')
 
-source('code/prepare_data/prepare_data_for_STAN.R')
+source('code/prepare_data/make_all_data.R')
 
 # analysis pipeline ------------------------------------------ # 
 

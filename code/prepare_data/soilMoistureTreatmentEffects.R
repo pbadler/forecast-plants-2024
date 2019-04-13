@@ -115,7 +115,7 @@ tab <-
   dplyr::select(season, rainfall,  Treatment, lsmean, SE, asymp.LCL, asymp.UCL) %>%
   arrange(season, rainfall, Treatment)
 
-statsOutput <- 'manuscript/soil_moisture_model.tex'
+statsOutput <- 'tables/soil_moisture_model.tex'
 
 texreg(
   mTreatment,

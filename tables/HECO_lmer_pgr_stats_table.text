@@ -1,0 +1,28 @@
+
+\begin{table}
+\caption{Cover change models}
+\begin{center}
+\begin{tabular}{l c }
+\hline
+ & Model 1 \\
+\hline
+(Intercept)           & $0.02$            \\
+                      & $[-0.30;\ 0.35]$  \\
+TreatmentDrought      & $-0.90^{*}$       \\
+                      & $[-1.40;\ -0.40]$ \\
+TreatmentIrrigation   & $-0.02$           \\
+                      & $[-0.47;\ 0.43]$  \\
+\hline
+AIC                   & 208.04            \\
+BIC                   & 219.89            \\
+Log Likelihood        & -99.02            \\
+Num. obs.             & 79                \\
+Num. groups: year     & 6                 \\
+Var: year (Intercept) & 0.08              \\
+Var: Residual         & 0.66              \\
+\hline
+\multicolumn{2}{l}{\scriptsize{$^*$ 0 outside the confidence interval}}
+\end{tabular}
+\label{table:coefficients}
+\end{center}
+\end{table}

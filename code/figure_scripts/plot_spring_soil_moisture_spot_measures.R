@@ -16,7 +16,7 @@ calibration2 <- read.csv('data/2015-04-29_soil_probe_calibration.csv', skip = 8)
 
 # output ---------------------------------------------------- # 
 
-statsTable <- 'manuscript/spot_measurements.tex'
+statsTable <- 'tables/spot_measurements.tex'
 figure_file <- 'figures/VWC_spot_measurements.png'
 
 # ---------------------------------------------------- # 

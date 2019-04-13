@@ -82,7 +82,7 @@ dPSSP <-
 mPSSP <- lmer(log_change ~ Treatment + (1|year), data = dPSSP)
 summary( mPSSP )
 
-statsOutput <- paste0( "output/", species, "_lmer_pgr_stats_table.text")
+statsOutput <- paste0( "tables/", species, "_lmer_pgr_stats_table.text")
 output <- list(mARTR,mHECO,mPOSE,mPSSP)
 
 for(i in 1:length(species)){ 
@@ -237,10 +237,10 @@ xt3 <- xtable(lc.POSE, caption = 'Treatment effects on log cover change for \tex
 xt4 <- xtable(lc.PSSP, caption = 'Treatment effects on log cover change for \textit{Pseudoroegneria} from 2011 to 2016. Intercept gives control effects.', 
               label = 'table:changePSSP')
 
-print(xt1, 'manuscript/ARTR_cover_change.tex', type = 'latex', caption.placement ="top")
-print(xt2, 'manuscript/HECO_cover_change.tex', type = 'latex', caption.placement ="top")
-print(xt3, 'manuscript/POSE_cover_change.tex', type = 'latex', caption.placement ="top")
-print(xt4, 'manuscript/PSSP_cover_change.tex', type = 'latex', caption.placement ="top")
+print(xt1, 'tables/ARTR_cover_change.tex', type = 'latex', caption.placement ="top")
+print(xt2, 'tables/HECO_cover_change.tex', type = 'latex', caption.placement ="top")
+print(xt3, 'tables/POSE_cover_change.tex', type = 'latex', caption.placement ="top")
+print(xt4, 'tables/PSSP_cover_change.tex', type = 'latex', caption.placement ="top")
 
 artr <- data.frame( summary(lc.ARTR)$coefficients)
 heco <- data.frame(summary(lc.HECO)$coefficients)
@@ -265,7 +265,7 @@ overall_xtable <- xtable( table_df ,
                           caption = 'Treatment effects on log cover change for each species from 2011 to 2016. Intercept gives control effects.', 
                           label = 'table:coverChange')
 
-print(overall_xtable, 'manuscript/overall_cover_change.tex', type = 'latex', caption.placement = 'top',  digits=c(2,2,2,2,2))
+print(overall_xtable, 'tables/overall_cover_change.tex', type = 'latex', caption.placement = 'top',  digits=c(2,2,2,2,2))
 
 # plot average cover chag
 
