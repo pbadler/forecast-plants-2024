@@ -45,7 +45,6 @@ quarterly_VWC <-
 # -------- output -----------------------------------------------------------------------------#
 
 saveRDS( seasonal_VWC, seasonal_outfile) 
-#saveRDS( quarterly_VWC, quarterly_outfile) 
 saveRDS( annual_VWC, annual_outfile) 
 
 # ---------- monthly soil moisture --------------------------------------------------# 

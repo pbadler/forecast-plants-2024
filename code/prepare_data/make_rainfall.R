@@ -2,6 +2,7 @@ rm(list = ls())
 
 library( tidyverse )
 library(zoo) # for rollapply
+library(lubridate)
 
 # input ---------------------------------------------------- #
 
@@ -13,7 +14,9 @@ rainfall_outfile <- 'data/temp_data/daily_station_dat_rainfall.RDS'
 
 # ---------------------------------------------------------------------------------------
 
-weather$date <- as.POSIXct( strptime( weather$date, '%Y-%m-%d', tz = 'MST') )
+weather <- 
+  weather %>% 
+  filter( date < date('2018-01-01')) # drop most recent year
 
 weather <-
   weather %>%
@@ -42,10 +45,16 @@ weather <-
 weather <-
   weather %>%
   ungroup() %>%
-  mutate( simple_date = as.Date( date, tz = 'MST')) %>%
-  mutate( year = strftime( simple_date, '%Y', tz = 'MST')) %>%
+  mutate( year = year(date)) %>%
   group_by( year ) %>%
-  arrange( year, simple_date ) %>%
-  mutate( ann_cum_PRCP = ifelse(is.na(PRCP), 0, PRCP))
+  arrange( year, date )
+
+# %>% 
+#   mutate( ann_cum_PRCP = ifelse(is.na(PRCP), 0, PRCP))  # I don't know what this does 
+
+weather <- 
+  weather %>% 
+  ungroup()  %>% 
+  filter( ! row_number() == max( row_number() ))
 
 saveRDS(weather, rainfall_outfile )

@@ -1,7 +1,7 @@
 rm(list = ls())
 
 library( tidyverse )
-
+library(lubridate)
 # input ---------------------------------------------------- #
 
 decagon <- sheepweather::usses_decagon # comes from sheepweather package 
@@ -17,7 +17,7 @@ decagon_outfile <- 'data/temp_data/decagon_data_with_station_data.RDS'
 
 decagon <-
   decagon %>%
-  left_join(rainfall, by = 'simple_date')
+  left_join(rainfall, by = 'date')
 
 saveRDS(decagon, decagon_outfile )
 

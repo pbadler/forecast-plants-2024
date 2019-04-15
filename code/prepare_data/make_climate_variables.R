@@ -7,6 +7,7 @@
 rm(list = ls()) 
 
 library(tidyverse)
+library(lubridate)
 
 # input --------------------------------------------------------------------#
 
@@ -41,8 +42,8 @@ monthly <-
   weather %>% 
   spread( ELEMENT, value ) %>% 
   mutate( tmean = (TMAX + TMIN) / 2 ) %>% 
-  mutate( MONTH = as.numeric(strftime(date, '%m', tz = 'MST'))) %>% 
-  mutate( YEAR = as.numeric(strftime(date, '%Y', tz = 'MST'))) %>% 
+  mutate( MONTH = month(date)) %>%                                      ### I think this is where I made the timezone mistake
+  mutate( YEAR = year(date)) %>% 
   group_by(YEAR, MONTH) %>% 
   summarise( PRCP = sum(PRCP, na.rm = T), TAVG = mean(tmean, na.rm = T))
 
@@ -50,7 +51,8 @@ monthly <-
 
 monthly <- 
   monthly %>% 
-  left_join(season, by = c('MONTH' = 'month')) %>% 
+  left_join(season, 
+            by = c('MONTH' = 'month')) %>% 
   mutate( water_year = YEAR + lag_year ) %>% 
   select(YEAR, MONTH, season, precip_seasons, water_year, PRCP, TAVG)
 
@@ -96,7 +98,9 @@ seasonal_clim <-
   unite(var, c(var, stat) , sep = '_')
 
 # -------------- join dfs for variables -------------------------------------------------------#
-seasonal_clim <- left_join( annual_clim, seasonal_clim, by = "YEAR")
+# seasonal_clim <-                                                                                  # I don't think I need this
+#   left_join( annual_clim, 
+#              seasonal_clim, by = "YEAR")
 
 # -------join periods -------------------------------------------------------------------------#
 

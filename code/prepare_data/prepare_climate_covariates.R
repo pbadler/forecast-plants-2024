@@ -62,19 +62,13 @@ q_VWC <-
   mutate(VWC.sp.1 = avg, 
          VWC.sp.0 = lag( VWC.sp.1, 4),
          VWC.sp.l = lag( VWC.sp.0, 4),
-         #VWC.sp.su.1 = rollapply(avg, 2, 'mean', na.rm = TRUE, align = 'right', fill = NA),
-         #VWC.sp.su.0 = lag(VWC.sp.su.1, 4),
-         #VWC.sp.su.l = lag(VWC.sp.su.0, 4),
          VWC.su.1 = lag(avg, 3),
          VWC.su.0 = lag(VWC.su.1, 4),
          VWC.su.l = lag(VWC.su.0, 4),
          VWC.f.1  = lag(avg, 2), 
          VWC.f.0  = lag(VWC.f.1, 4),
          VWC.f.l  = lag(VWC.f.0, 4)) %>%
-         #VWC.a.1 = rollapply(avg, 4, 'mean', na.rm = TRUE, align = 'right', fill = NA), 
-         #VWC.a.0 = lag( VWC.a.1,4), 
-         #VWC.a.l = lag( VWC.a.0,4)) %>%
-  filter( season == 'spring') %>% # plants are measured at the end of spring each year 
+  filter( season == 'spring') %>%                                           # plants are measured at the end of spring each year 
   dplyr::select( Treatment, Period, year, season, starts_with("VWC")) %>%
   ungroup() %>% 
   gather( var, val, starts_with('VWC')) %>% 
