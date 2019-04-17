@@ -79,7 +79,7 @@ For each vital rate and species, we fit eight models to the training dataset onl
 ```{r }
 library(pander)
 
-window_table <- read_csv('../tables/climate_window_descriptions.csv')
+window_table <- read_csv('../data/climate_window_descriptions.csv')
 
 window_table$seasons[ is.na(window_table$seasons) ] <- 'none'
 

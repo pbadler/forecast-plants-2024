@@ -11,12 +11,12 @@ stan_model_file <- 'code/analysis/growth.stan'
 
 species <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
-testing <- F
+testing <- T
 if( testing ){ 
   
   k <- 2                      ### number of folds 
-  n_mods <- 1
-  species <- species[1]
+  n_mods <- 2
+  species <- species[1:2]
   
   # STAN pars -------------- 
   ncores <- 1 

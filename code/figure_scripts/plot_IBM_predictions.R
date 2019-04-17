@@ -1,5 +1,6 @@
 rm(list = ls())
 
+library(tidyverse)
 IBM_table <- read_csv('output/IBM_model_table.csv')
 
 cover_obs <- readRDS('data/temp_data/all_cover.RDS') # observed cover per quadrat 
@@ -17,7 +18,7 @@ era_labels <-
 
 sppList <- unique(cover_obs$spp)
 
-i <- 1 
+i <- 4 
 
 spp <- IBM_table$spp[i] 
 IBM_ID <- IBM_table$IBM_ID[i] 
@@ -55,9 +56,6 @@ t_cover_pred <-
 q_pred_df <- 
   q_cover_pred %>% 
   left_join( cover_obs, by = c('quad', 'year', 'Treatment', 'spp', 'era') )
-
-
-q_pred_df 
 
 t_cover_obs <- 
   cover_obs %>% 

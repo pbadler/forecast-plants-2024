@@ -7,7 +7,7 @@ library(loo)
 source('code/analysis/stan_data_functions.R')
 
 vr <- 'recruitment'
-stan_model_file <- 'analysis/recruitment/recruitment.stan'
+stan_model_file <- 'code/analysis/recruitment.stan'
 
 testing <- T
 if( testing ){ 
@@ -32,7 +32,7 @@ formX = as.formula(paste0 ('~ P1_inter + P2 + C')) ### Fixed effects design matr
 # ------------------------------------------
 
 # set up climate variable table --------------------------# 
-stan_mods <- read_csv('output/model_ranks_new.csv')
+stan_mods <- read_csv('output/model_ranks.csv')
 
 top_mods <- 
   stan_mods %>% 

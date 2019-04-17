@@ -2,10 +2,9 @@ rm(list = ls())
 library(rstan)
 library(tidyverse)
 
-source('analysis/stan_data_functions.R')
+source('code/analysis/stan_data_functions.R')
 
-top_model <- readRDS('output/stan_fits/ARTR_growth_model_3_top_model.RDS')
-null_model <- readRDS('output/stan_fits/ARTR_growth_model_NULL_MOD_top_model.RDS')
+null_model  <- readRDS('output/stan_fits/ARTR_growth_none_model.RDS')
 
 test <- rstan::summary(top_model, 'hold_mu')
 test$summary[, 1]

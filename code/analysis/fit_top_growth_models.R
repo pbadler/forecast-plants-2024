@@ -37,7 +37,7 @@ formE = as.formula(~ size)  ### For growth model, size dependent variance design
 # ------------------------------------------
 
 # set up climate variable table --------------------------# 
-stan_mods <- read_csv('output/model_ranks_new.csv')
+stan_mods <- read_csv('output/model_ranks.csv')
 
 top_mods <- 
   stan_mods %>% 

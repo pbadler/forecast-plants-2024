@@ -94,7 +94,7 @@ for(i in 1:nrow( model_list)){
   G <- exp( G*Y_scale + Y_center ) # tranform to cm scale
   R <- rstan::extract( rfit, 'IBM_Y_hat')$IBM_Y_hat
   
-  a <- get_recruit_area(spp, my_path)
+  a <- get_recruit_area(spp)
   
   K <- S*G  # survival by size 
   R <- R*median(a)
