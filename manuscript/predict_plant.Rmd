@@ -79,7 +79,7 @@ For each vital rate and species, we fit eight models to the training dataset onl
 ```{r }
 library(pander)
 
-window_table <- read_csv('../output/climate_window_descriptions.csv')
+window_table <- read_csv('../tables/climate_window_descriptions.csv')
 
 window_table$seasons[ is.na(window_table$seasons) ] <- 'none'
 
@@ -201,7 +201,9 @@ We ranked each of the vital rate models for each of the species based on out of 
 library(tidyverse)
 library(loo)
 
-model_ranks <- read_csv('../output/stan_model_ranks.csv') %>% 
+model_ranks <- read_csv('../output/model_ranks.csv') 
+
+model_ranks %>% 
   left_join(window_table, by = c('climate_window' = 'model')) %>% 
   arrange(spp, vr, model_rank ) %>%
   select(spp, vr, model_rank, climate_window, oos_lppd, oos_mse, description) 
@@ -279,11 +281,13 @@ test_cor$out
 ![**Figure X Average soil moisture in the control, drought, and irrigation treatments during each year of the experiment.  Soil moisture was monitored in four drought plots, four irrigated plots and four ambient control plots. Two sensors were installed at 5 cm depth at each plot and two at 25 cm and data was logged every 2 hours.**](../figures/avg_daily_soil_moisture.png)
 
 
-![**Figure X Average seasonal soil moisture in the control, drought, and irrigation treatments during each year of the experiment. The dashed gray lines give the 5th percentile and 95th percentile limits for seasonal soil moisture in the historical record (1929 to 2010).**](../figures/modern_soil_moisture_comparison_compared_to_historical.png)
+![**Figure X Average seasonal soil moisture in the control, drought, and irrigation treatments during each year of the experiment. The dashed gray lines give the 5th percentile and 95th percentile limits for seasonal soil moisture in the historical record (1926 to 2010).**](../figures/modern_soil_moisture_comparison.png)
 
 
+![**Figure X Average seasonal temperature during each year of the experiment. The dashed gray lines give the 5th percentile and 95th percentile limits for average temperature during the historical record (1926 to 2010).**](../figures/lt_TAVG.png)
 
-![**Figure X Log change in cover in each of the experimental plots from the pre-treatment monitoring in 2011 to the last year of the experiment in 2016. Box plots show the median cover change and the interquartile range. ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*.**](../figures/start_to_finish_cover_change.png)
+
+![**Figure X Log change in cover in each of the experimental plots from the pre-treatment monitoring in 2011 to the last year of the experiment in 2016. Box plots show the median cover change and the interquartile range. ARTR = *Artemisia*, HECO = *Hesperostipa*, POSE = *Poa*, PSSP = *Pseudoroegnaria*.**](../figures/start_to_finish_cover_change_new.png)
 
 
 

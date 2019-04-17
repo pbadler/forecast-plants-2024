@@ -11,6 +11,17 @@ seasonal_VWC <- readRDS('data/temp_data/seasonal_VWC.RDS')
 annual_VWC <- readRDS('data/temp_data/annual_VWC.RDS')
 monthly_avg <- readRDS('data/temp_data/monthly_avg.RDS')
 
+seasonal_VWC <- 
+  seasonal_VWC %>% 
+  filter( year > 1926, year < 2017)
+
+annual_VWC <- 
+  annual_VWC %>% 
+  filter( year > 1926, year < 2017)
+
+monthly_avg <- 
+  monthly_avg %>% 
+  filter( year > 1926, year < 2017)
 
 # ---------- monthly soil moisture --------------------------------------------------# 
 #
@@ -63,7 +74,7 @@ gg_soil_moist <-
   theme( panel.grid =  element_blank())
 
 ggsave(gg_soil_moist, 
-       filename = 'figures/modern_soil_moisture_comparison_spring.png', 
+       filename = 'figures/modern_soil_moisture_comparison.png', 
        width = 6, height = 6)
 
 # Just focus on spring 
@@ -83,3 +94,7 @@ gg_spring <-
 ggsave(gg_spring, 
       filename = 'figures/modern_soil_moisture_comparison_spring.png', 
        width = 5, height = 3)
+
+
+
+
