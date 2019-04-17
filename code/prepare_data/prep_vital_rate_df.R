@@ -58,4 +58,3 @@ for( i in 1:nrow(data_df)){
   
 }
 
-file.remove( data_df$gfile, data_df$sfile, data_df$rfile)  # Clean up temporary files 
