@@ -2,9 +2,10 @@ rm(list = ls())
 
 library( tidyverse )
 library(lubridate)
+library(sheepweather)
 # input ---------------------------------------------------- #
 
-decagon <- sheepweather::usses_decagon # comes from sheepweather package 
+decagon <- usses_decagon # comes from sheepweather package 
 
 rainfall <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS')
   # comes from the make_rainfall script

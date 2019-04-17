@@ -3,6 +3,7 @@
 rm(list = ls())
 library( tidyverse)
 library(lubridate)
+library(sheepweather)
 
 # input ---------------------------------------------------- #
 seasons <- read.csv('data/season_table.csv')
@@ -10,7 +11,7 @@ seasons <- read.csv('data/season_table.csv')
 daily_clim <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS') 
   # comes from 'make_rainfall.R'
 
-spotVWC <- sheepweather::usses_spot_sm # comes from package
+spotVWC <- usses_spot_sm # comes from package
 
 # output ---------------------------------------------------- #
 

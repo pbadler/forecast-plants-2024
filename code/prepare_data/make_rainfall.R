@@ -3,10 +3,11 @@ rm(list = ls())
 library( tidyverse )
 library(zoo) # for rollapply
 library(lubridate)
+library(sheepweather)
 
 # input ---------------------------------------------------- #
 
-weather <- sheepweather::usses_weather # use sheepweather package 
+weather <- usses_weather # use sheepweather package 
 
 # output ---------------------------------------------------- #
 

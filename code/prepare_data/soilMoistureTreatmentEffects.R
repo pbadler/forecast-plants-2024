@@ -7,12 +7,13 @@ library(lubridate)
 library(lme4)
 library(lsmeans)
 library(texreg)
+library(sheepweather)
 
 # input ---------------------------------------------------- #
 
 load('code/figure_scripts/my_plotting_theme.Rdata')
 
-swVWC <- sheepweather::usses_soilwat  # soilwat output
+swVWC <- usses_soilwat  # soilwat output
 spotVWC <- readRDS('data/temp_data/spotVWC.RDS') # from aggregate spot script 
 
 myVWC <- readRDS('data/temp_data/decagon_data_with_station_data.RDS')   # cleaned decagon data
@@ -369,8 +370,7 @@ swVWC <-
   swVWC %>% 
   ungroup() %>% 
   mutate( water_year = year + lag_year ) %>% 
-  mutate( quarter = cut(month, 4, labels = paste0('Q', 1:4))) %>%
-  dplyr::select(year, quarter, month, year, season, season_label, precip_seasons, water_year, Treatment, date, VWC, VWC_raw)
+  dplyr::select(year, month, season, season_label, precip_seasons, water_year, Treatment, date, VWC, VWC_raw)
 
 swVWC <- 
   swVWC %>% 

@@ -8,12 +8,13 @@ rm(list = ls())
 
 library(tidyverse)
 library(lubridate)
+library(sheepweather)
 
 # input --------------------------------------------------------------------#
 
-season <- read.csv('data/season_table.csv')
+season <- read_csv('data/season_table.csv')
 
-weather <- sheepweather::usses_weather
+weather <- usses_weather
 
 # output --------------------------------------------------------------------#
 
@@ -37,7 +38,6 @@ p3 <- data.frame( Period = 'Historical', YEAR = 1925:1957)
 periods <- data.frame( rbind( p1, p2, p3 )) 
 
 # -------------------------------------------------------------------- # 
-
 monthly <- 
   weather %>% 
   spread( ELEMENT, value ) %>% 
@@ -46,8 +46,6 @@ monthly <-
   mutate( YEAR = year(date)) %>% 
   group_by(YEAR, MONTH) %>% 
   summarise( PRCP = sum(PRCP, na.rm = T), TAVG = mean(tmean, na.rm = T))
-
-#
 
 monthly <- 
   monthly %>% 
@@ -78,6 +76,8 @@ monthly_clim <-
   mutate( Irrigation = ifelse( YEAR > 2011 & MONTH %in% c(im[1]:im[2]), Control*p.treatments[2], Control) ) %>% 
   gather(Treatment, PRCP, Control, Drought, Irrigation)
 
+monthly_clim %>% filter( is.na(TAVG))
+monthly_clim %>% filter( is.na(PRCP))
 # -------------------------------------------------------------------------------------------#
 # -------------- aggregate monthly climate with Treatment effects by season -----------------#
 
@@ -85,7 +85,7 @@ seasonal_clim <-
   monthly_clim %>% 
   mutate(YEAR = ifelse(MONTH == 12 , YEAR + 1, YEAR  )) %>% # account for December 
   gather( var, val , TAVG, PRCP ) %>% 
-  group_by(Treatment, var, MONTH) %>% 
+  group_by(Treatment, var, MONTH)  %>% filter( is.na(val)) %>% 
   mutate( val = ifelse(is.na(val), mean(val, na.rm = TRUE), val)) %>% # !!!!!!! fill in missing monthly averages after 1925 with monthly average !!!!!!!! 
   group_by( Treatment, var, YEAR, season ) %>%                        # !!!!!!! note missing values TAVG  !!!!!!!!
   summarise( avg = mean(val), ttl = sum(val) ) %>% 
@@ -96,11 +96,6 @@ seasonal_clim <-
   arrange(YEAR, season) %>%
   ungroup() %>% 
   unite(var, c(var, stat) , sep = '_')
-
-# -------------- join dfs for variables -------------------------------------------------------#
-# seasonal_clim <-                                                                                  # I don't think I need this
-#   left_join( annual_clim, 
-#              seasonal_clim, by = "YEAR")
 
 # -------join periods -------------------------------------------------------------------------#
 
