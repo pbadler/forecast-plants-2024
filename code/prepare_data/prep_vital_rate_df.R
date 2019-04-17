@@ -1,6 +1,14 @@
 rm(list = ls() )
 
+# 
+# Produce the dataframes with climate and demographic data for stan 
+# If the temporary demographic data files are missing then the "get_all_demographic_data" script needs to be re-run 
+#
+
+library(tidyverse)
+
 source( 'code/prepare_data/prep_vital_rate_df_functions.R')
+
 
 prep_vital_rate_df <- function( clim_file = 'data/temp_data/all_clim_covs.RDS', gfile , sfile , rfile = NULL){ 
   
@@ -31,7 +39,6 @@ prep_vital_rate_df <- function( clim_file = 'data/temp_data/all_clim_covs.RDS', 
 data_df <- expand.grid( species = c('ARTR', 'HECO', 'POSE', 'PSSP'), 
                         vr = c('growth_survival', 'recruitment'))
 
-library(tidyverse)
 
 data_df <- 
   data_df %>% 
@@ -50,3 +57,5 @@ for( i in 1:nrow(data_df)){
   prep_vital_rate_df(gfile = data_df$gfile[i], sfile = data_df$sfile[i], rfile = data_df$rfile[i])
   
 }
+
+file.remove( data_df$gfile, data_df$sfile, data_df$rfile)  # Clean up temporary files 

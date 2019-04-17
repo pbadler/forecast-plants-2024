@@ -1,6 +1,10 @@
 #######################################################################################
 #
 # Setup seasonal climate variables for demographic rate models 
+# 
+#  This script aggregates the daily weather data to monthly averages for TAVG and 
+#  monthly total PRCP.  These are then aggregated to seasonal average TAVG and total 
+#  PRCP.  
 #
 #######################################################################################
 
@@ -85,7 +89,7 @@ seasonal_clim <-
   monthly_clim %>% 
   mutate(YEAR = ifelse(MONTH == 12 , YEAR + 1, YEAR  )) %>% # account for December 
   gather( var, val , TAVG, PRCP ) %>% 
-  group_by(Treatment, var, MONTH)  %>% filter( is.na(val)) %>% 
+  group_by(Treatment, var, MONTH)  %>% 
   mutate( val = ifelse(is.na(val), mean(val, na.rm = TRUE), val)) %>% # !!!!!!! fill in missing monthly averages after 1925 with monthly average !!!!!!!! 
   group_by( Treatment, var, YEAR, season ) %>%                        # !!!!!!! note missing values TAVG  !!!!!!!!
   summarise( avg = mean(val), ttl = sum(val) ) %>% 
