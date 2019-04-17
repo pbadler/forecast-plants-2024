@@ -20,7 +20,8 @@ The driversdata submodule loads all the relevant historical and experimental dem
 data for use in the analyses.  This is currently a private repository. 
 
 ## Run the analysis 
-Run the code/analysis_pipeline.R script to process data and run all analyses
+Run the code/forecast-plants.R script to process data and run all analyses
+
 
 This takes a long time to loop through all the species, cross validation folds and model variants. 
 
