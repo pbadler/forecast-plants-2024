@@ -274,25 +274,15 @@ dev.off()
 
 swVWC <- 
   swVWC %>% 
-  mutate( date = date(parse_date_time(paste( Year, DOY, sep = '-') , orders = '%Y-%j'))) %>% 
+  mutate( date = date(parse_date_time(paste( Year, Day, sep = '-') , orders = '%Y-%j'))) %>% 
   rename( 'year' = Year) %>% 
   mutate( month = month( date )) # use lubridate function 
-
-lyr3 <-
-  swVWC %>% 
-  group_by(month, year) %>% 
-  summarise(avg = mean(Lyr_3))
-
-lyr3 <- lyr3 %>% spread(month, avg)
-lyr3 <- lyr3[complete.cases(lyr3),]
-mydata <- lyr3[, 2:13]
-mydata <- scale(mydata)
 
 # set-up aggregate seasonal variables for model ----------------------------------------#
 
 swVWC <-
   swVWC %>%
-  gather(layer, VWC, Lyr_1:Lyr_6) %>%
+  gather(layer, VWC, Lyr_1:Lyr_4) %>%
   filter(layer %in% c('Lyr_1', 'Lyr_2', 'Lyr_3', 'Lyr_4'))
 
 swVWC <- 
@@ -398,6 +388,7 @@ print(
     )))
 )
 dev.off()
+
 print(
   ggplot(swVWC, aes(
     x = date, y = VWC, color = Treatment

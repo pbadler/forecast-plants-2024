@@ -9,6 +9,8 @@ bibliography: precip_experiment.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(pander)
 ```
 
 # Abstract 
@@ -201,12 +203,13 @@ We ranked each of the vital rate models for each of the species based on out of 
 library(tidyverse)
 library(loo)
 
-model_ranks <- read_csv('../output/model_ranks.csv') 
+model_ranks <- read_csv('../output/model_ranks.csv') %>% 
+  mutate( climate_window = ifelse(is.na( climate_window), 'NULL_MOD', climate_window ))
 
 model_ranks %>% 
   left_join(window_table, by = c('climate_window' = 'model')) %>% 
-  arrange(spp, vr, model_rank ) %>%
-  select(spp, vr, model_rank, climate_window, oos_lppd, oos_mse, description) 
+  arrange(spp, vr, oos_lppd ) %>%
+  select(spp, vr, climate_window, oos_lppd, oos_mse, description) 
 
 model_ranks %>% pander()
 
@@ -264,14 +267,14 @@ Funding was provided by NSF grants DEB-1353078, and DEB-1054040 to PBA, an NSF G
 
 ```{r }
 
-test_cor <- 
-  model_ranks %>% 
-  select( -model_rank) %>% 
-  group_by( spp, vr ) %>% 
-  summarise( out = list( cor.test( oos_lppd, oos_mse)) ) 
+# test_cor <- 
+#   model_ranks %>% 
+#   group_by( spp, vr ) %>% 
+#   summarise( out = list( cor.test( oos_lppd, oos_mse)) ) 
+# 
+# names(test_cor$out) <- paste0(test_cor$spp, test$vr)
+# test_cor$out
 
-names(test_cor$out) <- paste0(test_cor$spp, test$vr)
-test_cor$out
 ```
 
 # Figures 
