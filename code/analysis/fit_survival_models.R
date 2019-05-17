@@ -4,24 +4,27 @@ library(rstan)
 library(tidyverse)
 library(loo)
 
+rstan_options(auto_write = T)
+options( mc.cores = parallel::detectCores())
+
 source('code/analysis/stan_data_functions.R')
 
 vr <- 'survival'
 stan_model_file <- 'code/analysis/survival.stan'
 species <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
-testing <- T
+testing <- F
 if( testing ){ 
   
   k <- 2                      ### number of folds 
   n_mods <- 2
-  species <- species[1:2]
+  species <- species[1:4]
   
   # STAN pars -------------- 
   ncores <- 1 
-  niter <- 1000
+  niter <- 100
   nchains <- 1 
-  nthin <- 5
+  nthin <- 1
   
 }else{
   
