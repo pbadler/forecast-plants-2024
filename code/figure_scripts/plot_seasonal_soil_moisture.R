@@ -57,6 +57,39 @@ modern <- merge( modern, historical_avgs )
 
 modern$season <- factor(modern$season, levels = c('winter', 'spring', 'summer', 'fall'), ordered = T)
 
+seasonal_VWC$season <- factor(seasonal_VWC$season, levels = c('winter', 'spring', 'summer', 'fall'), ordered = T)
+
+gg_lt_seasonal_historic <- 
+  seasonal_VWC %>% 
+  filter( season != 'winter') %>% 
+  filter( Treatment == 'Control' & year < 1960) %>% 
+  ggplot( aes(x = year, y = avg, color = Treatment)) + 
+  geom_line() + 
+  facet_wrap(~season, nrow = 4) + 
+  my_theme + 
+  scale_color_manual(values = my_colors[2]) + 
+  ylab( 'Avg. seasonal soil moisture (%)') + 
+  ylim(0, 28)  + 
+  guides(color = 'none')
+
+gg_lt_seasonal_modern <- 
+  seasonal_VWC %>% 
+  filter( season != 'winter') %>% 
+  filter( year > 2006) %>% 
+  filter( Treatment == 'Control' | year > 2011 ) %>% 
+  ggplot( aes(x = year, y = avg, color = Treatment)) + 
+  geom_line() + 
+  facet_wrap(~season, nrow = 4) +
+  scale_color_manual(values = my_colors[2:4]) + 
+  my_theme + 
+  theme(axis.title.y = element_blank()) + 
+  ylim(0,28) 
+
+library(gridExtra)
+gg_lt_sm <- grid.arrange(gg_lt_seasonal_historic, gg_lt_seasonal_modern, nrow = 1 )
+
+ggsave(gg_lt_sm, filename = 'figures/lt_seasonal_sm.png', width = 7, height =10 )
+
 # make plot of seasonal moisture during the experiment  ------------------------------------------- #
 
 gg_soil_moist <- 
@@ -72,6 +105,7 @@ gg_soil_moist <-
   ylab( 'Average seasonal soil moisture content (ml/ml)') +
   theme_bw() +
   theme( panel.grid =  element_blank())
+
 
 ggsave(gg_soil_moist, 
        filename = 'figures/modern_soil_moisture_comparison.png', 

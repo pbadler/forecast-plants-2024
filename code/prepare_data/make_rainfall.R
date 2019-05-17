@@ -58,4 +58,10 @@ weather <-
   ungroup()  %>% 
   filter( ! row_number() == max( row_number() ))
 
+weather <- 
+  weather %>% 
+  group_by(prcp_event) %>% 
+  mutate( days_since_rain = row_number()) %>% 
+  mutate( inv_days_since_rain = total_rain/days_since_rain )
+
 saveRDS(weather, rainfall_outfile )

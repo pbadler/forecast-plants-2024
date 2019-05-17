@@ -18,6 +18,7 @@ rm(list = ls() )
 # library(MASS)
 # library(lsmeans)
 # library(lme4)
+# library(egg)
 
 # run data preparation files first --------------------------- # 
 
@@ -27,16 +28,22 @@ source('code/prepare_data/make_all_data.R') # takes a minute or two
 
 # Some treatment figures  ------------------------------------------ # 
 
-# 1. Treatment effects plot 
+# 1a. Treatment effects plot --spot measurements 
 source('code/figure_scripts/plot_spring_soil_moisture_spot_measures.R')
 
-# 2. Shelter temperature plot 
+# 1b. Treatment effects plot -- daily soil raw average vs modeled average 
+source('code/figure_scripts/plot_soil_moisture_effects.R')
+
+# 2. Daily SoilWat vs. average ambient soil moisture 
+source('code/figure_scripts/plot_soilwat_to_ambient_comparison.R')
+
+# 3. Shelter temperature plot 
 source('code/figure_scripts/test_for_shelter_temperature_effects.R')
 
-# 3. Soil moisture aggregated by season 
+# 4. Soil moisture aggregated by season 
 source('code/figure_scripts/plot_seasonal_soil_moisture.R')
 
-# 4. Temperature aggregated by season  
+# 5. Temperature aggregated by season  
 source('code/figure_scripts/plot_longterm_TAVG.R')
 
 # 2. Cover trends
