@@ -18,19 +18,19 @@ rank_mods %>%
   mutate(window_lab = ifelse (is.na(climate_window), 0, climate_window)) %>% 
   group_by( spp, vr) %>% 
   mutate( top = oos_lppd == max(oos_lppd)) %>% 
-  ggplot( aes( x = window_lab, y = oos_lppd, color = vr)) + 
+  ggplot( aes( x = window_lab, y = oos_lppd, color = spp)) + 
   geom_line() + 
-  geom_point(data = . %>% filter(top), aes( x = window_lab, y = oos_lppd), shape = 2) + 
-  facet_grid(spp ~ . , scales = 'free')
+  geom_point(data = . %>% filter(top), aes( x = window_lab, y = oos_lppd), shape = 2, show.legend = F) + 
+  facet_wrap( vr ~ spp, scales = 'free')
 
 rank_mods %>% 
   mutate(window_lab = ifelse (is.na(climate_window), 0, climate_window)) %>% 
   group_by( spp, vr) %>% 
   mutate( top = oos_mse == min(oos_mse)) %>% 
-  ggplot( aes( x = window_lab , y = oos_mse, color = vr)) + 
+  ggplot( aes( x = window_lab , y = oos_mse, color = spp)) + 
   geom_line() + 
   geom_point(data = . %>% filter(top), aes( x = window_lab, y = oos_mse), shape = 2, show.legend = F) + 
-  facet_grid( spp ~.  , scales = 'free')
+  facet_wrap( vr ~ spp  , scales = 'free')
 
 rank_mods %>% 
   ggplot( aes ( x = oos_lppd, y = oos_mse)) + 

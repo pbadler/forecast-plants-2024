@@ -25,7 +25,7 @@ if( testing ){
   # STAN pars -------------- 
   ncores <- 1 
   niter <- 100
-  nchains <- 1 
+  nchains <- 4 
   nthin <- 1
 
 }else{
@@ -45,7 +45,7 @@ adapt_delta <- c(0.98, 0.98, 0.8, 0.8)  #  species specific
 # --------------------------
 
 # Model Parameters 
-formX = as.formula('~ P1_inter + P2 + C') ### Fixed effects design matrix (include climate as "C")
+formX = as.formula('~ C') ### Fixed effects design matrix (include climate as "C")
 
 # set up model selection table --------------------------# 
 load('data/temp_data/climate_combos.RData')
@@ -62,7 +62,6 @@ model_combos <- model_combos %>% head( n_mods )
 total <- k*nrow(model_combos)*length(species)  ### Total number of models to fit 
 
 counter <- 1
-s <- 1
 
 for( s in 1:length(species)){ 
   
@@ -83,15 +82,22 @@ for( s in 1:length(species)){
   
   dat <- 
     dat %>% 
-    mutate( all_cover = cov.ARTR + cov.HECO + cov.POSE + cov.PSSP)
-  
-  dat$P1 <- dat[ , paste0('cov.', sp) ]
-  dat$P2 <- dat[ , paste0('Gcov.', sp)]
-  
-  dat$P1_inter <- dat$all_cover - dat$P1
-  
-  dat$P1_inter <- scale( sqrt( dat$P1_inter))
-  dat$P2 <- scale( sqrt( dat$P2 ))
+    ungroup %>% 
+    rowwise( ) %>% 
+    mutate( total_basal_cover = cov.HECO + cov.POSE + cov.PSSP) %>% 
+    mutate( total_open = 100*100 - total_basal_cover) %>% 
+    mutate( l_open = log(total_open))
+    
+  # dat$P1 <- dat[ , paste0('cov.', sp) ]
+  # dat$P2 <- dat[ , paste0('Gcov.', sp)]
+  # 
+  # dat$P1_inter <- dat$all_cover - dat$P1
+  # 
+  # dat$P1_inter <- scale( sqrt( dat$P1_inter))
+  # dat$P2 <- scale( sqrt( dat$P2 ))
+  # dat$open <- log(10000 - dat$all_cover)
+  # 
+  # dat$open
   
   ## Set up output table 
   temp_scores <- model_combos
@@ -102,8 +108,6 @@ for( s in 1:length(species)){
   temp_scores$oos_mse <- NA
   temp_scores$oos_lppd <- NA
   
-  j <- 1
-  
   for( j in 1:nrow(temp_scores)) { 
     
     # get climate effects 
@@ -112,8 +116,9 @@ for( s in 1:length(species)){
     lpd <- NA
     sse <- NA
     div <- 0
-    i <- 1
+    
     for( i in 1:k ){
+      
       hold <- k_folds$yid[ k_folds$folds == i  ] 
       
       dl <- process_recruitment_data(dat = dat, 
@@ -146,6 +151,13 @@ for( s in 1:length(species)){
                               control = list(adapt_delta = ad), 
                               refresh = -1)
       
+
+      if(nchains != dim( summary(fit1)$c_summary)[3]){ 
+        print("missing chains!!!!!!!!!!!!")
+        print(paste('species', sp, 'model', j, 'fold', k ))
+        stop( paste('missing chains for: species', sp, 'model', j, 'fold', k ) )
+      }
+      
       div <- div + find_dv_trans(fit1)
       
       lpd[i] <- sum(get_lpd(fit1))
@@ -163,6 +175,3 @@ for( s in 1:length(species)){
   saveRDS(temp_scores, paste0( 'output/', sp, '_', vr, '_model_scores.RDS'))
   
 }
-
-
-
