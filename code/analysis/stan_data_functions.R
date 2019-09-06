@@ -76,10 +76,10 @@ make_dl <- function(df){
   return(dl)
 }
 
-get_lpd <- function(my_fit){ 
+get_lpd <- function(my_fit, llname = 'log_lik' ){ 
   require(loo)
   
-  lpd <- log(colMeans(exp(extract_log_lik(my_fit, 'hold_log_lik'))))
+  lpd <- log(colMeans(exp(extract_log_lik(my_fit, llname))))
 
   return(lpd)
 }
@@ -114,9 +114,12 @@ left_censor_df <- function(df, left_cut){
   # of logarea.t1
   # it is rescaled to the Y-scale and then applied 
   
-  U <- scale(left_cut,  attributes(df$Y)$`scaled:center`, attributes(df$Y)$`scaled:scale` )
-  print(U)
-  df$U <- as.numeric(U)
+  U <-  max ( df$Y[ df$logarea.t1 < left_cut ], na.rm = T )
+  
+  hist(df$Y)
+  abline(v = U, lty = 2)
+  
+  df$U <- U
   df$censored <- as.numeric( df$Y <= df$U )
  
   return(df)
@@ -245,3 +248,63 @@ find_dv_trans <- function(x){
   return(dv)
 }
 
+
+
+translate_ci <- function( ci ){ 
+  lc <- (100 - ci)/2
+  uc <- (100 - lc )
+  return( c(lc, uc))
+} 
+
+translate_ci <- Vectorize(translate_ci)
+
+test_pp_intervals <- function(Y_obs, my_fit, ci = c(95,90,75,50)) { 
+  
+  cls <- translate_ci(ci)  
+  cls <- sort( as.numeric (cls/100 ))
+  labs <- paste0( 'X', cls*100, '.') 
+  limit_level <- factor( labs, levels = unique(labs) , labels = c(ci, rev(ci)) )
+  
+  labels <- data.frame( limit = labs, limit_level)
+  
+  temp <- summary(my_fit, 'Y_hat', c(cls, 0.5) )$summary
+  
+  data.frame( temp, Y = Y_obs ) %>%
+    mutate( id = row_number()) %>% 
+    rename( 'med' = `X50.` ) %>% 
+    gather( limit, value, starts_with('X')) %>% 
+    left_join(labels) %>% 
+    mutate( side = ifelse( value < med, 'lower', 'upper' )) %>% 
+    select( - limit ) %>% 
+    spread( side, value) %>%  
+    mutate( below = Y < lower, 
+            above = Y > upper )
+} 
+
+scale_and_fold <- function(species, lc = 0, k = 2, filenames){
+  
+  file_name <- filenames[ str_detect(filenames, species)  ]
+  
+  dat <- readRDS(file_name)
+  dat <- dat[ dat$Period == 'Historical',  ] 
+  
+  folds <- kfold_split_grouped(k, dat$yid) 
+  dat$folds <- folds
+  
+  k_folds <- 
+    dat %>% 
+    distinct(yid, folds)
+  
+  dat$size <- scale( dat$logarea.t0 )
+  dat$small <- as.numeric(dat$size < small)
+  dat$Y    <- scale( dat$logarea.t1 )
+  dat$GroupP2 <- as.numeric( dat$Group == 'P2') # Paddock P2 is weird 
+  
+  intra_comp <- paste0('W.', species)
+  dat$W.intra  <- scale( dat[ , intra_comp])
+  dat$W.inter <- scale( rowSums(dat$W[, -( grep ( intra_comp , colnames(dat$W))) ] ) ) # inter specific comp. 
+  
+  dat <- left_censor_df(dat, lc )  
+  
+  return(dat)
+}

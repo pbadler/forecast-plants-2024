@@ -9,12 +9,16 @@ options( mc.cores = parallel::detectCores())
 
 source('code/analysis/stan_data_functions.R')
 
+testing <- T
+
 vr <- 'growth'
-stan_model_file <- 'code/analysis/growth.stan'
+model_file <- 'code/analysis/growth2_student_t.stan'
+
+stan_model( file = model_file, 
+            model_name = vr, save_dso = T)
 
 species <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
-testing <- F
 if( testing ){ 
   
   k <- 2                      ### number of folds 
@@ -36,11 +40,10 @@ if( testing ){
   ncores <- 4 
   niter <- 2000
   nchains <- 4 
-  nthin <- 5
+  nthin <- 4
   
 }
 
-adapt_delta <- c(0.98, 0.98, 0.8, 0.8)  #  species specific 
 # --------------------------
 
 # Model Parameters 
@@ -49,7 +52,10 @@ formZ = as.formula(~ size)  ### Year effects design matrix
 formX = as.formula(paste0 ('~ size + small + W.intra + W.inter + C')) ### Fixed effects design matrix (include climate as "C")
 formE = as.formula(~ size)  ### For growth model, size dependent variance design matrix  
 
-left_cut <- c(-1, -1.3, -1.3, -1.3) # for censored data 
+left_cut <- data.frame( 
+  species = species, 
+  lc = c(0, -1, -1, -1) 
+  ) # for censored data 
 
 # set up model selection table --------------------------# 
 load('data/temp_data/climate_combos.RData')
@@ -58,113 +64,86 @@ nvars <- length(T_combos)
 
 climate_effects <- paste0( 'C.T.', 1:nvars, '*', 'C.VWC.', 1:nvars)
 climate_effects <- c('NULL', climate_effects)
+climate_effects <- climate_effects[1:n_mods]
 
-model_combos <- data.frame( climate_effects = climate_effects)
+model_combos <- 
+  expand.grid( species = species, model = climate_effects, fold = 1:k) %>% 
+  arrange( species, model, fold) %>% 
+  mutate( id = row_number() ) %>% 
+  select( id, species, model, fold ) %>% 
+  left_join(left_cut)
 
-model_combos <- model_combos %>% head( n_mods )
+model_combos <- model_combos %>% split( .$id)
+total <- length(model_combos)
 
-total <- k*nrow(model_combos)*length(species)  ### Total number of models to fit 
+dat_filenames <- dir(path = 'data/temp_data', pattern = '.*_growth_survival_dataframe.RDS', full.names = T)
+
+prepped_dfs <- 
+  mapply( x = as.character( left_cut$species), 
+        y = left_cut$lc, 
+        FUN = function(x, y, ... ) scale_and_fold(species = x, lc = y,...), 
+        k = k, filenames = dat_filenames, SIMPLIFY = T)
+
 
 counter <- 1
+s <- 1
+i <- 1
 
-for( s in 1:length(species)){ 
+output <- list()
+
+for( i in 1:length( model_combos )){ 
   
-  sp <- species[s]
-  ad <- adapt_delta[s]
-  lc <- left_cut[s]
+  sp <- model_combos[[i]]$species
+  dat <- prepped_dfs[[sp]]  
+  model <- model_combos[[i]]$model
+  formC <- as.formula( paste0 ( '~-1 + ', model  ))  ### Climate effects design matrix 
+  fold <- model_combos[[i]]$fold
   
-  dat_file <- paste0('data/temp_data/', sp, '_growth_survival_dataframe.RDS')
+  hold <- unique( dat$yid[ dat$folds == fold ] )
   
-  dat <- readRDS(dat_file)
-  dat <- dat[ dat$Period == 'Historical',  ] 
+  dl <- process_data(dat = dat, 
+                     formX = formX, 
+                     formC = formC, 
+                     formZ = formZ, 
+                     formE = formE,
+                     vr = vr, 
+                     hold = hold, 
+                     IBM = 0)
   
-  folds <- kfold_split_grouped(k, dat$yid) 
-  dat$folds <- folds
+  print( paste( '### ---- species ', sp, ' out of ', length(species), ' -------- # '))
+  print( paste( '### ---- working on rep', counter, 'of', total, ': ', 100*(counter - 1)/total, '% done ----------###' ))
   
-  k_folds <- 
-    dat %>% 
-    distinct(yid, folds)
+  cat('\n\n')
   
-  dat$size <- scale( dat$logarea.t0 )
-  dat$small <- as.numeric(dat$size < small)
-  dat$Y    <- scale( dat$logarea.t1 )
-  dat$GroupP2 <- as.numeric( dat$Group == 'P2') # Paddock P2 is weird 
+  fit <- stan(file = model_file, 
+               data = dl, 
+               chains = nchains, 
+               iter = niter, 
+               cores = ncores,
+               thin = nthin,
+               pars = c('log_lik', 'hold_log_lik', 'hold_SSE'), 
+               refresh = -1)
   
-  intra_comp <- paste0('W.', sp)
-  dat$W.intra  <- scale( dat[ , intra_comp])
-  dat$W.inter <- scale( rowSums(dat$W[, -( grep ( intra_comp , colnames(dat$W))) ] ) ) # inter specific comp. 
+  stopifnot(get_num_divergent(fit) == 0) ### stop if there are divergent transitions 
   
-  dat <- left_censor_df(dat, left_cut = lc)
+  rhat <- range( summary( fit, 'log_lik')$summary[, 'Rhat'] )
+  ins_lppd  <- sum( get_lpd(fit, 'log_lik'))
+  oos_lpd  <- get_lpd(fit, 'hold_log_lik')
+  oos_sse  <- summary(fit, 'hold_SSE')$summary[, 'mean']        
+  hold_N   <- dl$hold_N
+  N        <- dl$N 
   
-  ## Set up output table 
-  temp_scores <- model_combos
-  temp_scores$spp <- sp 
-  temp_scores$vr <- vr
-  temp_scores$climate_window <- as.numeric( str_extract(model_combos$climate_effects, '\\d+'))
-  temp_scores$ndiv <- NA
-  temp_scores$oos_mse <- NA
-  temp_scores$oos_lppd <- NA
+  my_pars <- c('rhat', 'ins_lppd', 'oos_lpd', 'oos_sse', 'hold_N', 'N')  
+  stats <- lapply( my_pars, function(x) eval(parse( text = x)))
+  names( stats ) <- my_pars
+  output[[i]] <- c( model_combos[[i]], stats )
+   
+  counter <- counter + 1 
   
-  for( j in 1:nrow(temp_scores)) { 
-    
-    # get climate effects 
-    formC <- as.formula( paste0 ( '~-1 + ', model_combos$climate_effects[j]  ))  ### Climate effects design matrix 
-    
-    lpd <- NA
-    sse <- NA
-    div <- 0
-    
-    for( i in 1:k ){
-      hold <- k_folds$yid[ k_folds$folds == i  ] 
-      
-      dl <- process_data(dat = dat, 
-                         formX = formX, 
-                         formC = formC, 
-                         formZ = formZ, 
-                         formE = formE,
-                         vr = vr, 
-                         hold = hold, 
-                         IBM = 0)
-      
-      # --------------------------------------------------------- #
-      
-      mod <- rstan::stan_model(stan_model_file) # load stan model 
-      
-      # ---------------------------------------------------------- # 
-      
-      cat('\n\n')
-      
-      print( paste( '### ---- species ', s, ' out of ', length(species), ' -------- # '))
-      print( paste( '### ---- working on rep', counter, 'of', total, ': ', 100*(counter - 1)/total, '% done ----------###' ))
-      
-      cat('\n\n')
-      
-      fit1 <- rstan::sampling(mod, 
-                              data = dl, 
-                              chains = nchains, 
-                              iter = niter, 
-                              cores = ncores,
-                              thin = nthin,
-                              pars = c('hold_log_lik', 'hold_SSE'), 
-                              control = list(adapt_delta = ad), 
-                              refresh = -1)
-      
-      div <- div + find_dv_trans(fit1)
-      lpd[i] <- sum(get_lpd(fit1))
-      sse[i] <- summary(fit1, 'hold_SSE')$summary[, 'mean']        
-      
-      counter <- counter + 1 
-      
-    }
-    
-    temp_scores$ndiv[j] <- div
-    temp_scores$oos_lppd[j] <- sum( lpd )
-    temp_scores$oos_mse[j]  <- sum(sse)/length(dl$N + dl$hold_N) # divide by total number of observations
-    
-  }
-  
-  saveRDS(temp_scores, paste0( 'output/', sp, '_', vr, '_model_scores.RDS'))
+  rm(list =  c(my_pars, c('fit', 'dl', 'hold', 'formC', 'model', 'dat', 'fold')))
   
 }
+
+output
 
 

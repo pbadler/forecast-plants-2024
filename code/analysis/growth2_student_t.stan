@@ -15,7 +15,23 @@ data{
   vector[N_obs] Y_obs;    // only obs with valid size
   real<upper=min(Y_obs)> U;  // Upper limit of censored data 
   
-  
+  // holdout data
+  int<lower=0> hold_N;              // observations
+  vector[hold_N] hold_Y;            // observation vector
+  row_vector[J] hold_Z[hold_N];     // simple intercept x size design matrix
+  int<lower=0> hold_G;              // groups
+  int<lower=0> hold_g[hold_N];      // group id
+  matrix[hold_N,K] hold_X;          // covariate matrix
+
+  // For generating IBM predictions use all data 
+  int<lower=0, upper=1> IBM;          // Flag if predictions for IBM are to be generated 
+  int<lower=0> IBM_N;                  
+  matrix[IBM_N,K] IBM_X;
+  row_vector[J] IBM_Z[IBM_N];
+  int<lower=0> IBM_G;
+  int<lower=0> IBM_g[IBM_N];
+       
+
 }
 transformed data{ 
   vector[J] alpha;               // prior on dirichlet distribution
@@ -36,14 +52,12 @@ parameters{
 }
 transformed parameters{
   vector[N] mu;             
-  vector[J] u[G];                 // un-scaled group effects 
- 
+  vector[J] u[G]; // un-scaled group effects 
+  matrix[J,J] Sigma_L = diag_pre_multiply(pi_*J*tau^2, L_u);  // cholesky of covariance 
+  
   {
     vector[N] fixef = X*beta;     // fixed effects 
 
-    // generates covMat diagonal; Explained by rstanarm glmer vignette
-    matrix[J,J] Sigma_L = diag_pre_multiply(pi_*J*tau^2, L_u);  // cholesky of covariance matrix
-  
     for(j in 1:G)
       u[j] = Sigma_L * col(u_raw, j);    
 
@@ -69,18 +83,69 @@ model{
 
 }
 generated quantities{ 
-  
   real Y_hat[N] = student_t_rng(nu, mu, sigma);
   real log_lik[N]; 
-
+  
+  vector[hold_N] hold_mu;         
+  vector[hold_N] hold_log_lik;
+  real hold_SSE; 
+  
+  vector[IBM_N] IBM_mu;           
+  
   for(i in 1:N){ 
-    
     if( Y[i] > U){ 
       log_lik[i] = student_t_lpdf(Y[i] | nu, mu[i], sigma);
-      
     }else if(Y[i] <= U){ 
       log_lik[i] = student_t_lcdf( U | nu, mu[i], sigma);
     }
   }
   
+  {
+    // Generate out of sample predictions and log-likelihoods 
+    vector[J] hold_u[hold_G];       
+    vector[hold_N] hold_fixef = hold_X*beta; 
+    vector[hold_G*J] ones = rep_vector(1.0, hold_G*J); 
+    vector[hold_G*J] zeros = rep_vector(0.0, hold_G*J); 
+    
+    matrix[J, hold_G] hold_u_raw = to_matrix( normal_rng(zeros, ones), J, hold_G); 
+    
+    vector[hold_N] hold_SE; 
+
+    for(i in 1:hold_G)
+      hold_u[i] = Sigma_L * col(hold_u_raw, i);
+      
+    for(i in 1:hold_N)
+      hold_mu[i] = hold_fixef[i] + hold_Z[i]*hold_u[hold_g[i]];
+    
+    for(i in 1:hold_N){ 
+      if( hold_Y[i] > U){ 
+        hold_log_lik[i] = student_t_lpdf(hold_Y[i] | nu, hold_mu[i], sigma);
+      }else if(hold_Y[i] <= U){ 
+        hold_log_lik[i] = student_t_lcdf( U | nu, hold_mu[i], sigma);
+      }
+      hold_SE[i] = ( hold_mu[i] - hold_Y[i] )^2 ;
+    }
+    
+    hold_SSE = sum(hold_SE);
+  }
+
+  
+  if( IBM ==  1 ){ 
+    vector[J] IBM_u[IBM_G];       
+    vector[IBM_N] IBM_fixef = IBM_X*beta; 
+    vector[IBM_G*J] ones = rep_vector(1.0, IBM_G*J); 
+    vector[IBM_G*J] zeros = rep_vector(0.0, IBM_G*J); 
+    matrix[J, IBM_G] IBM_u_raw = to_matrix( normal_rng(zeros,ones), J, IBM_G); 
+  
+    for(i in 1:IBM_G)
+      IBM_u[i] = Sigma_L * col(IBM_u_raw, i);
+      
+    for(i in 1:IBM_N)
+      IBM_mu[i] = IBM_fixef[i] + IBM_Z[i]*IBM_u[IBM_g[i]];
+
+  }else{
+    
+    IBM_mu = to_vector(rep_array(0, IBM_N));
+    
+  }
 }
