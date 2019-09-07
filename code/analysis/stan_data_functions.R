@@ -281,7 +281,7 @@ test_pp_intervals <- function(Y_obs, my_fit, ci = c(95,90,75,50)) {
             above = Y > upper )
 } 
 
-scale_and_fold <- function(species, lc = 0, k = 2, filenames){
+scale_and_fold <- function(species, small = -1, lc = 0, k = 10, filenames){
   
   file_name <- filenames[ str_detect(filenames, species)  ]
   
@@ -308,3 +308,62 @@ scale_and_fold <- function(species, lc = 0, k = 2, filenames){
   
   return(dat)
 }
+
+
+get_model_score <- function( model_combos,
+                             vr,
+                             model_file, 
+                             prepped_dfs, 
+                             formZ = as.formula(~ size ), 
+                             formX = as.formula(~ size + small + W.intra + W.inter + C),
+                             n_iter = 2000, 
+                             nthin = 4){ 
+  id <- model_combos$id                      
+  sp <- model_combos$species
+  model <- model_combos$model
+  formC <- as.formula( paste0 ( '~-1 + ', model  ))  ### Climate effects design matrix 
+  fold <- model_combos$fold
+  
+  dat <- prepped_dfs[[sp]]  
+  hold <- unique( dat$yid[ dat$folds == fold ] )
+  
+  dl <- process_data(dat = dat, 
+                     formX = formX, 
+                     formC = formC, 
+                     formZ = formZ, 
+                     formE = ~ 1,
+                     vr = vr, 
+                     hold = hold, 
+                     IBM = 0)
+  
+  cat('\n\n')
+  
+  fit <- stan(file = model_file, 
+              data = dl, 
+              chains = 4, 
+              iter = n_iter, 
+              cores = 4,
+              thin = nthin,
+              verbose = F,
+              pars = c('log_lik', 'hold_log_lik', 'hold_SSE'), 
+              refresh = -1)
+  
+  stopifnot(get_num_divergent(fit) == 0) ### stop if there are divergent transitions 
+  
+  mx_rhat <- max(summary( fit, 'log_lik')$summary[, 'Rhat'])
+  mn_rhat <- min( summary( fit, 'log_lik')$summary[, 'Rhat'])
+  ins_lppd  <- sum( get_lpd(fit, 'log_lik'))
+  oos_lpd  <- sum( get_lpd(fit, 'hold_log_lik'))
+  oos_sse  <- summary(fit, 'hold_SSE')$summary[, 'mean']        
+  hold_N   <- dl$hold_N
+  N        <- dl$N 
+  
+  my_pars <- c('mx_rhat', 'mn_rhat', 'ins_lppd', 'oos_lpd', 'oos_sse', 'hold_N', 'N')  
+  stats <- lapply( my_pars, function(x) eval(parse( text = x)))
+  names( stats ) <- my_pars
+  
+  temp_scores <- c( model_combos, stats, vr = vr )
+  outfile <- paste0('output/model_scores/', vr, '_scores_', id, '.rds')
+  write_rds( temp_scores, path = outfile) 
+}
+
