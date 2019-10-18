@@ -1,0 +1,68 @@
+---
+title: "Forecasting the Response of Plant Populations to Experimental Climate Treatments"
+author: "Andrew Kleinhesselink"
+date: "10/18/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+# Summary 
+
+Interannual variation in weather is an important driver of population dynamics for many organisms. However, there have been few rigorous tests of whether observational timeseries of population dynamics can predict how those populations will respond to future variation in climate or weather. We used a long term observational data to model how the vital rates of four perennial plant species are affected by interannual climate variation. We then constructed an individual based population model to predict how cover of each species would respond to experimental treatments that directly manipulated rainfall and soil moisture. 
+
+We drew our data from a timeseries of mapped plant growth, survival and recruitment in 26 plots from the year 1926 to 2016. We fitted Bayesian models to annual growth, survival and recruitment rates of four dominant perennial plants in these plots--three grasses: *Hesperostipa comata*, *Pseudoroegneria spicata* and *Poa secunda*--and one shrub, *Artemisia tripartita*.  For each species, we fit 8 different models including different combinations of annual climate covariates.  We evaluated model performance using K-fold cross validation within the observational training data.   
+
+To test whether these models could actually predict population dynamics in held out data we manipulated rainfall and soil moisture in 16 new plots for five years from 2011 to 2017. Data on plant performance in these plots were not used to fit the models described above so they represent valid out of sample data for testing prediction accuracy. We then used the most accurate models (based on K-fold cross validation) to predict one-step-ahead growth, survival and recruitment rates.  These rates were combined in an individual based population model to predict total cover in each plot.
+
+Details on the statistical models, population models and the climate variables are available in the github repository for this project: https://github.com/akleinhesselink/forecast-plants
+
+## Graphical Summary of Predictions 
+
+```{r echo=F, include=T, message = F, warning=FALSE}
+library(tidyverse)
+
+gg <- readRDS('../output/gg_cover_pred_ARTR_climate.RDS')
+
+plot (gg )
+
+```
+Figure 1:  Predicted and observed annual variation in cover of Artemisia tripartita.  Average cover in the historical time series is shown from 1925 to 2010.  Individual based data from this time period was used to fit vital rate models for growth, survival and recruitment. All data from 2011 to 2016 was held out in fitting the demographic models.  An individual based population model was used to project one-step-ahead cover in each plot and then cover was averaged for each year to produce the figure above.  From 2011 to 2016 the points show the observed values of cover in the held out data, whereas the solid lines show the predicted cover. Shaded areas show 50% and 90% Bayesian Credible Intervals around the predictions.  
+
+
+```{r echo=F, include=T, message = F, warning=FALSE}
+library(tidyverse)
+
+gg <- readRDS('../output/gg_cover_pred_HECO_climate.RDS')
+
+plot (gg )
+
+```
+
+Figure 2. Predicted and observed annual variation in cover of Hesperostipa comata. Details as above for Artemisia tripartita.   
+
+```{r echo=F, include=T, message = F, warning=FALSE}
+library(tidyverse)
+
+gg <- readRDS('../output/gg_cover_pred_POSE_climate.RDS')
+
+plot (gg )
+
+```
+
+Figure 3. Predicted and observed annual variation in cover of Poa secunda. Details as above for Artemisia tripartita. 
+
+
+```{r echo=F, include=T, message = F, warning=FALSE}
+library(tidyverse)
+
+gg <- readRDS('../output/gg_cover_pred_PSSP_climate.RDS')
+
+plot (gg )
+
+```
+
+Figure 4. Predicted and observed annual variation in cover of Pseudoroegneria spicata. Details as above for Artemisia tripartita. 
+
