@@ -1,7 +1,7 @@
 data{
   // training datalist, historical observations 
   int<lower=0> N;                       // # observations total 
-  int<lower=0, upper=1> S[N];           // success
+  int<lower=0> Y[N];                    // observation vector
   int<lower=0> K;                       // # of fixed effects
   matrix[N,K] X;                        // fixed effects matrix   
   int<lower=0> J;                       // # of group level effects
@@ -11,7 +11,7 @@ data{
 
   // holdout data
   int<lower=0> hold_N;                  // hold_N == 2 if no held out data
-  int<lower=0, upper=1> hold_S[hold_N];
+  int<lower=0, upper=1> hold_Y[hold_N];
   matrix[hold_N,K] hold_X;
   row_vector[J] hold_Z[hold_N];
   int<lower=0> hold_G;
@@ -33,14 +33,15 @@ transformed data{
 }
 parameters{
   // for training data model  
-	vector[K] beta;                       // fixed effects
-	simplex[J] pi_;                       // simplex for diagonal of group-level covariance matrix 
-	real<lower=0> tau;                    // scale parameter for group-level covariance matrix
-  cholesky_factor_corr[J] L_u;          // cholesky factor for group-level correlation
-	matrix[J,G] u_raw;                    // raw group-level effects 
+	vector[K] beta;                 // fixed effects
+	simplex[J] pi_;                 // simplex for diagonal of group-level covariance matrix 
+	real<lower=0> tau;              // scale parameter for group-level covariance matrix
+  cholesky_factor_corr[J] L_u;    // cholesky factor for group-level correlation
+	matrix[J,G] u_raw;              // raw group-level effects 
+  real<lower=0> inverse_phi ;     // inverse of negative binomial scale 
 }
 transformed parameters{
-  vector[N] mu;             
+  vector<lower=0>[N] eta;             
   vector[J] u[G]; // un-scaled group effects 
   matrix[J,J] Sigma_L = diag_pre_multiply(pi_*J*tau^2, L_u);  // cholesky of covariance 
   
@@ -51,7 +52,7 @@ transformed parameters{
       u[j] = Sigma_L * col(u_raw, j);    
 
     for(n in 1:N)
-      mu[n] = fixef[n] + Z[n]*u[g[n]];
+      eta[n] = fixef[n] + Z[n]*u[g[n]]; 
   }
   
 }
@@ -62,19 +63,27 @@ model{
   tau ~ gamma(1,1);             // gamma as per rstanarm glmer vignette
   L_u ~ lkj_corr_cholesky(1.0);
   to_vector(u_raw) ~ std_normal();
+  
+  inverse_phi ~ gamma(0.001, 0.001);
 
   // Likelihood
-  S ~ bernoulli_logit_lpmf(mu);
+  Y ~ neg_binomial_2_lpmf(exp(eta), 1.0/inverse_phi );
 }
 generated quantities {
+  int Y_hat[N] = neg_binomial_2_rng(exp(eta), 1.0/inverse_phi ); 
   real log_lik[N]; 
-  vector[hold_N] hold_mu;         
+  vector<lower=0>[hold_N] hold_eta;         
   vector[hold_N] hold_log_lik;
   real hold_SSE; 
-  vector[IBM_N] IBM_mu;           
+  vector<lower=0>[IBM_N] IBM_eta;           
+  
+  // vector[N] mu; 
+  // vector[hold_N] hold_mu; 
+  // vector[IBM_N] IBM_mu; 
+
   
   for(i in 1:N)
-    log_lik[i] = bernoulli_logit_lpmf(S[i] | mu[i]);
+    log_lik[i] = neg_binomial_2_lpmf(Y[i] | exp(eta[i]), 1.0/inverse_phi);
   
   {
     // Generate out of sample predictions and log-likelihoods 
@@ -89,11 +98,11 @@ generated quantities {
       hold_u[i] = Sigma_L * col(hold_u_raw, i);
       
     for(i in 1:hold_N)
-      hold_mu[i] = hold_fixef[i] + hold_Z[i]*hold_u[hold_g[i]];
+      hold_eta[i] = hold_fixef[i] + hold_Z[i]*hold_u[hold_g[i]] ;
     
     for(i in 1:hold_N){ 
-      hold_log_lik[i] = bernoulli_logit_lpmf(hold_S[i] | hold_mu[i]);
-      hold_SE[i] = ( hold_mu[i] - hold_S[i] )^2 ;
+      hold_log_lik[i] = neg_binomial_2_lpmf(hold_Y[i] | exp(hold_eta[i]), 1.0/inverse_phi);
+      hold_SE[i] = ( exp(hold_eta[i]) - hold_Y[i] )^2 ;
     }
     
     hold_SSE = sum(hold_SE);
@@ -110,10 +119,14 @@ generated quantities {
       IBM_u[i] = Sigma_L * col(IBM_u_raw, i);
       
     for(i in 1:IBM_N)
-      IBM_mu[i] = IBM_fixef[i] + IBM_Z[i]*IBM_u[IBM_g[i]];
+      IBM_eta[i] =  IBM_fixef[i] + IBM_Z[i]*IBM_u[IBM_g[i]]  ;
       
   }else{
     
-    IBM_mu = to_vector(rep_array(0, IBM_N));
+    IBM_eta = to_vector(rep_array(0, IBM_N));
   }
+
+  // mu = exp( eta ) ; 
+  // hold_mu = exp(hold_eta); 
+  // IBM_mu = exp( IBM_mu ); 
 }

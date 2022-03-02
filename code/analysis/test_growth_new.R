@@ -2,13 +2,13 @@ rm(list = ls())
 library(tidyverse)
 library(rstan)
 
-rstan_options(auto_write = T, cores = 4)
-iter <- 1000
+rstan_options(auto_write = T)
+
 source('code/analysis/stan_data_functions.R')
 
 datfiles <- dir('data/temp_data/', '*_growth_survival_dataframe.RDS', full.names = T)
 
-my_dat <- readRDS(datfiles[1])
+my_dat <- readRDS(datfiles[2])
 
 my_dat <- 
   my_dat %>% 
@@ -20,22 +20,12 @@ my_dat <-
 my_dat$Y <- scale( my_dat$logarea.t1 )
 Y <- as.numeric(my_dat$Y)
 
-growth <- density( my_dat$logarea.t1 - my_dat$logarea.t0 )
-plot(growth)
-
-msize <- mean(my_dat$logarea.t0)
-growth_big <- density( my_dat$logarea.t1[ my_dat$logarea.t0 > msize ] - my_dat$logarea.t0[ my_dat$logarea.t0 > msize ] )
-plot(growth_big)
-
-growth_small <- density( my_dat$logarea.t1[ my_dat$logarea.t0 < msize ] - my_dat$logarea.t0[ my_dat$logarea.t0 < msize ] )
-plot(growth_small)
-
 test <- hist( my_dat$logarea.t1 )
-my_lower_limit <- 0 
-abline(v = 0, col = 'red', lty = 2)
+left_cut <- -0.666
+abline(v = left_cut, col = 'red', lty = 2)
 
-table( my_dat$logarea.t1[my_dat$logarea.t1 < my_lower_limit ] )
-U <-  max ( Y[ my_dat$logarea.t1 < my_lower_limit ] )
+table( my_dat$logarea.t1[my_dat$logarea.t1 < left_cut  ] )
+U <-  max ( Y[ my_dat$logarea.t1 < left_cut ] )
 
 hist( Y )
 abline( v = U, col = 'blue', lty = 2)

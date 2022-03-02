@@ -11,7 +11,7 @@ source('code/analysis/stan_data_functions.R')
 vr <- 'growth'
 stan_model_file <- 'code/analysis/growth.stan'
 
-testing <- T
+testing <- F
 if( testing ){ 
   
   # STAN pars -------------- 

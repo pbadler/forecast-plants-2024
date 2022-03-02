@@ -1,37 +1,35 @@
 data{
   // training data
-  int<lower=0> N;                     // observations
-  vector[N] Y;                        // all observations
-  int<lower=1> K;                     // number of covariates in the design matrix 
+  int<lower=0> N;                     // num. observations
+  vector[N] Y;                        // response
+  int<lower=1> K;                     // num. of covariates 
   matrix[N,K] X;                      // fixed effects matrix   
-  int<lower=1> J;                     // number of group level effects
-  row_vector[J] Z[N];                 // simple design matrix for random year effects (year x size) 
+  int<lower=1> J;                     // num. of group level effects
+  row_vector[J] Z[N];                 // random year effects (year x size)
   int<lower=1> G;                     // num. groups (years)
   int<lower=1> g[N];                  // group id (year id)
-  int<lower=0> N_cens;                // censored 
-  int<lower=0> N_obs;                 // not censored 
-  int<lower=0, upper=N> obs[N_obs];  // index of not censored 
+  int<lower=0> N_cens;                // censored (Y < U)
+  int<lower=0> N_obs;                 // not censored (Y >= U)
+  int<lower=0, upper=N> obs[N_obs];   // index of not censored 
   int<lower=0, upper=N> cens[N_cens]; // index of censored observations 
-  vector[N_obs] Y_obs;    // only obs with valid size
-  real<upper=min(Y_obs)> U;  // Upper limit of censored data 
+  vector[N_obs] Y_obs;                // obs with valid size
+  real<upper=min(Y_obs)> U;           // Upper limit of cens. data 
   
   // holdout data
   int<lower=0> hold_N;              // observations
   vector[hold_N] hold_Y;            // observation vector
-  row_vector[J] hold_Z[hold_N];     // simple intercept x size design matrix
+  row_vector[J] hold_Z[hold_N];     // simple intercept x size
   int<lower=0> hold_G;              // groups
   int<lower=0> hold_g[hold_N];      // group id
   matrix[hold_N,K] hold_X;          // covariate matrix
 
   // For generating IBM predictions use all data 
-  int<lower=0, upper=1> IBM;          // Flag if predictions for IBM are to be generated 
+  int<lower=0, upper=1> IBM;        // Flag to generate IBM preds
   int<lower=0> IBM_N;                  
   matrix[IBM_N,K] IBM_X;
   row_vector[J] IBM_Z[IBM_N];
   int<lower=0> IBM_G;
   int<lower=0> IBM_g[IBM_N];
-       
-
 }
 transformed data{ 
   vector[J] alpha;               // prior on dirichlet distribution
@@ -42,13 +40,13 @@ transformed data{
 parameters{
   // for training data model  
 	real<lower=0> sigma;            // prediction error 
-	real<lower=1> nu;               // student-t degrees of freedom (fat-tails)
+	real<lower=1> nu;               // student-t (fat-tails)
   vector[K] beta;                 // fixed effects
   
-  cholesky_factor_corr[J] L_u;    // correlation of intcpt/slope of group effects
+  cholesky_factor_corr[J] L_u;    // correlation of intcpt/slope 
 	matrix[J,G] u_raw;              // scaled group effects 
 	simplex[J] pi_;                 // diagonal of the covariance matrix 
-  real<lower=0> tau;              // scale parameter for covariance matrix
+  real<lower=0> tau;              // scale for covariance matrix
 }
 transformed parameters{
   vector[N] mu;             
@@ -72,24 +70,21 @@ model{
   sigma ~ cauchy(0, 2); 
   nu ~ gamma(2,0.1);
   
-  pi_ ~ dirichlet(alpha);       // dirichlet as per rstanarm glmer vignette
-  tau ~ gamma(1,1);             // gamma as per rstanarm glmer vignette
+  pi_ ~ dirichlet(alpha);       // dirichlet as per rstanarm glmer
+  tau ~ gamma(1,1);             // gamma as per rstanarm glmer
   L_u ~ lkj_corr_cholesky(1.0);
   to_vector(u_raw) ~ std_normal();
 
   // Likelihood
   Y_obs ~ student_t_lpdf(nu, mu[obs], sigma);
-  target += student_t_lcdf( U | nu, mu[cens], sigma);  // integrate out the censored observations 
-
+  target += student_t_lcdf( U | nu, mu[cens], sigma);  // censored obs.  
 }
 generated quantities{ 
   real Y_hat[N] = student_t_rng(nu, mu, sigma);
   real log_lik[N]; 
-  
   vector[hold_N] hold_mu;         
   vector[hold_N] hold_log_lik;
   real hold_SSE; 
-  
   vector[IBM_N] IBM_mu;           
   
   for(i in 1:N){ 
@@ -106,9 +101,7 @@ generated quantities{
     vector[hold_N] hold_fixef = hold_X*beta; 
     vector[hold_G*J] ones = rep_vector(1.0, hold_G*J); 
     vector[hold_G*J] zeros = rep_vector(0.0, hold_G*J); 
-    
     matrix[J, hold_G] hold_u_raw = to_matrix( normal_rng(zeros, ones), J, hold_G); 
-    
     vector[hold_N] hold_SE; 
 
     for(i in 1:hold_G)
@@ -129,7 +122,6 @@ generated quantities{
     hold_SSE = sum(hold_SE);
   }
 
-  
   if( IBM ==  1 ){ 
     vector[J] IBM_u[IBM_G];       
     vector[IBM_N] IBM_fixef = IBM_X*beta; 
@@ -146,6 +138,5 @@ generated quantities{
   }else{
     
     IBM_mu = to_vector(rep_array(0, IBM_N));
-    
   }
 }

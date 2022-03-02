@@ -9,7 +9,7 @@ source('code/analysis/stan_data_functions.R')
 vr <- 'recruitment'
 stan_model_file <- 'code/analysis/recruitment.stan'
 
-testing <- T
+testing <- F
 if( testing ){ 
   
   # STAN pars -------------- 
@@ -28,7 +28,7 @@ if( testing ){
   
 }
 
-formX = as.formula(paste0 ('~ P1_inter + P2 + C')) ### Fixed effects design matrix (include climate as "C")
+formX = as.formula('~ C') ### Fixed effects design matrix (include climate as "C")
 # ------------------------------------------
 
 # set up climate variable table --------------------------# 
@@ -77,15 +77,22 @@ for(i in 1:nrow(model_list)){
   
   dat <- 
     dat %>% 
-    mutate( all_cover = cov.ARTR + cov.HECO + cov.POSE + cov.PSSP)
+    ungroup %>% 
+    rowwise( ) %>% 
+    mutate( total_basal_cover = cov.HECO + cov.POSE + cov.PSSP) %>% 
+    mutate( total_open = 100*100 - total_basal_cover) %>% 
+    mutate( l_open = log(total_open))
   
-  dat$P1 <- dat[ , paste0('cov.', sp) ]
-  dat$P2 <- dat[ , paste0('Gcov.', sp)]
-  
-  dat$P1_inter <- dat$all_cover - dat$P1
-  
-  dat$P1_inter <- scale( sqrt( dat$P1_inter))
-  dat$P2 <- scale( sqrt( dat$P2 ))
+  # dat$P1 <- dat[ , paste0('cov.', sp) ]
+  # dat$P2 <- dat[ , paste0('Gcov.', sp)]
+  # 
+  # dat$P1_inter <- dat$all_cover - dat$P1
+  # 
+  # dat$P1_inter <- scale( sqrt( dat$P1_inter))
+  # dat$P2 <- scale( sqrt( dat$P2 ))
+  # dat$open <- log(10000 - dat$all_cover)
+  # 
+  # dat$open
   
   if ( window != 'none' ){   
     moist <- paste0( 'C.VWC.', window)

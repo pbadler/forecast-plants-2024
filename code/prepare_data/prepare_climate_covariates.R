@@ -61,15 +61,16 @@ q_VWC <-
   arrange(Treatment, year, season) %>%
   mutate(VWC.sp.1 = avg, 
          VWC.sp.0 = lag( VWC.sp.1, 4),
-         VWC.sp.l = lag( VWC.sp.0, 4),
          VWC.su.1 = lag(avg, 3),
          VWC.su.0 = lag(VWC.su.1, 4),
-         VWC.su.l = lag(VWC.su.0, 4),
          VWC.f.1  = lag(avg, 2), 
-         VWC.f.0  = lag(VWC.f.1, 4),
-         VWC.f.l  = lag(VWC.f.0, 4)) %>%
+         VWC.f.0  = lag(VWC.f.1, 4), 
+         VWC.a.1 = rollapply(avg, 4,  'mean', na.rm  = T, align = 'right', fill = NA), 
+         VWC.a.0 = lag(VWC.a.1, 4), 
+         VWC.f.w.sp.1 = rollapply(avg, 3, 'mean', na.rm = T, align = 'right', fill = NA), 
+         VWC.sp.su.f.0 = lag(VWC.f.w.sp.1, 2)) %>% 
   filter( season == 'spring') %>%                                           # plants are measured at the end of spring each year 
-  dplyr::select( Treatment, Period, year, season, starts_with("VWC")) %>%
+  dplyr::select( Treatment, Period, year, season, contains('0')) %>%
   ungroup() %>% 
   gather( var, val, starts_with('VWC')) %>% 
   filter( !is.na(val)) %>%
@@ -82,13 +83,13 @@ q_precip <-
   arrange(Treatment, year, season) %>%
   mutate(P.f.w.sp.1 = rollsum(val, 3, align = 'right', fill = NA), 
          P.f.w.sp.0 = lag(P.f.w.sp.1, 4),
-         P.f.w.sp.l = lag(P.f.w.sp.0, 4),
          P.a.1      = rollsum(val, 4, align = 'right', fill = NA),
          P.a.0      = lag(P.a.1, 4),
-         P.a.l  = lag(P.a.0, 4),
          P.su.1 = lag(val, 3),                 
          P.su.0 = lag(P.su.1, 4), 
-         P.su.l = lag(P.su.0, 4)) %>% 
+         P.su.l = lag(P.su.0, 4), 
+         P.w.sp.1 = rollsum(val, 2, align = 'right', fill = NA), 
+         P.sp.su.0 = lag(P.w.sp.1, 3)) %>% 
   filter( season == 'spring') %>% # plants are measured at the end of spring each year 
   dplyr::select( Treatment, Period, year, season, starts_with("P"))
 
@@ -99,16 +100,12 @@ q_temp <-
   arrange(Treatment, year, season) %>% 
   mutate( T.sp.1 = val, 
           T.sp.0 = lag(T.sp.1, 4),
-          T.sp.l = lag(T.sp.0, 4), 
           T.su.1 = lag(val, 3), 
           T.su.0 = lag(T.su.1, 4), 
-          T.su.l = lag(T.su.0, 4),
           T.f.1 = lag(val, 2), 
           T.f.0 = lag(T.f.1, 4), 
-          T.f.l = lag(T.f.0, 4), 
           T.w.1 = lag(val, 1), 
-          T.w.0 = lag(T.w.1, 4), 
-          T.w.l = lag(T.w.0, 4)) %>% 
+          T.w.0 = lag(T.w.1, 4)) %>% 
   filter( season == 'spring') %>% 
   dplyr::select( Treatment, Period, year, season, starts_with("T."))
 

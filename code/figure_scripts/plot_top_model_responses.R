@@ -1,7 +1,7 @@
 rm(list = ls())
 library(tidyverse)
 
-stan_mods <- read_csv('~/Dropbox/projects/ExperimentTests/precip/output/model_ranks_new.csv')
+stan_mods <- read_csv('~/Dropbox/projects/forecast-plants/output/model_ranks.csv')
 
 top_mods <- 
   stan_mods %>% 
@@ -18,21 +18,31 @@ for( i in 1:nrow(top_mods)){
   
   
   if( !is.na(window) ){
-    fn <- paste0( 'output/stan_fits/', spp, '_', vr, '_model_', window, '_top_model.RDS')
+    fn <- paste0( 'output/stan_fits/', spp, '_', vr, '_', window, '_model.RDS')
     fit <- readRDS(fn)
-    beta <- rstan::summary(fit, c('beta[6]', 'beta[7]', 'beta[8]'))$summary[, c('mean', '2.5%', '50%', '97.5%')]
+    
+    if( vr == 'recruitment'){ 
+      beta <- rstan::summary(fit, c('beta[2]', 'beta[3]', 'beta[4]'))$summary[, c('mean', '2.5%', '50%', '97.5%')]
+    }else{ 
+      beta <- rstan::summary(fit, c('beta[6]', 'beta[7]', 'beta[8]'))$summary[, c('mean', '2.5%', '50%', '97.5%')]
+    }
+    
     beta <- 
       data.frame( t(beta) ) %>% 
       mutate( stat = row.names(.))
+    
+    names(beta) <- c('Moist', 'Temp', 'Temp_x_Moist', 'stat')
     
     out[[i]] <- data.frame( spp  = spp, vr = vr, climate_window = window, beta ) 
   }
 }
 
+out
+do.call(rbind, out )
+
 top_mods <- 
   top_mods %>% 
-  left_join( do.call(rbind, out ) ) %>% 
-  rename( 'Moist' = beta.6., 'Temp' = beta.7., 'Temp_x_Moist' = beta.8.) %>% 
+  left_join( do.call(rbind, out ) ) %>%
   gather( par, est, Moist:Temp_x_Moist) %>% 
   spread(stat, est) %>%
   select( - `<NA>`) 
@@ -45,6 +55,7 @@ gg1 <-
   geom_hline(aes( yintercept = 0), linetype = 2) + 
   facet_grid(vr~spp, scales = 'free_y') + 
   ylab( 'Parameter Estimate +/- 95% Bayesian Credible Intervals')
+
 
 top_mod <- 
   top_mods %>% 

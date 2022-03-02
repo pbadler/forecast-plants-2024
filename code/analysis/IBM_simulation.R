@@ -61,8 +61,7 @@ model_list %>%
   write_csv('output/IBM_model_table.csv')
 
 # loop species and climate / non-climate IBMs 
-i = 1
-
+i <- 2 
 for(i in 1:nrow( model_list)){ 
   spp <- model_list$spp[i]
   IBM_ID <- model_list$IBM_ID[i]

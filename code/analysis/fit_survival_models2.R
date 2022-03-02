@@ -1,5 +1,5 @@
 rm(list = ls())
-
+library(pbapply)
 library(rstan)
 library(tidyverse)
 library(loo)
@@ -15,7 +15,7 @@ if( testing ){
   # STAN pars -------------- 
   n_iter <- 500
   nthin <- 4
-  n_mods_per_species <- 2
+  n_mods_per_species <- 2 
 }else{
   # STAN pars -------------- 
   n_iter <- 2000
@@ -23,9 +23,9 @@ if( testing ){
 }
 
 # --------------------------
-vr <- 'growth'
-model_file <- 'code/analysis/growth2_student_t.stan'
-my_mod <- stan_model( file = model_file, model_name = vr, save_dso = T)
+vr <- 'survival'
+model_file <- 'code/analysis/survival.stan'
+stan_model( file = model_file, model_name = vr)
 model_combos <- read_rds('output/model_combos.rds')
 load('data/temp_data/prepped_dfs.rda')
 total <- length(model_combos)
@@ -34,7 +34,6 @@ total <- length(model_combos)
 small <- -1                 ### Designate a "small" size theshhold 
 formZ = as.formula(~ size)  ### Year effects design matrix 
 formX = as.formula(paste0 ('~ size + small + W.intra + W.inter + C')) ### Fixed effects design matrix (include climate as "C")
-
 
 if(testing == T){ 
   # just fit three models per species for testing 
@@ -58,4 +57,6 @@ pblapply(model_combos,
          prepped_dfs,
          n_iter = n_iter,
          nthin = nthin)
+
+
 

@@ -66,6 +66,7 @@ dat4stan <- make_cov_data_list(cover[[2]], climate, cover ~ cover0, cover ~ cove
 dat4stan2 <- make_cov_data_list(cover[[2]], climate, cover ~ cover0, cover ~ 1)
 
 fit2 <- stan('code/analysis/cover_model.stan', data = dat4stan, cores = 4, chains = 4)
+
 fit3 <- stan('code/analysis/cover_model.stan', data = dat4stan2, cores = 4, chains = 4)
 
 summary(fit2, 'beta')$summary

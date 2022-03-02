@@ -11,8 +11,7 @@ extract_data <- function(df){
 
   Y <- as.numeric(df$Y)
   S <- as.numeric(df$survives)
-  E <- df$E
-  D <- ncol(E)
+
   quad_name <- df$QuadName 
   year_name <- df$year
   
@@ -37,23 +36,13 @@ extract_data <- function(df){
 
 
 split_df <- function(df, vr, hold){ 
-  if(all(hold == 0) & vr != 'recruitment' ){
+  if(all(hold == 0) ){
     df_out <- split(df, df$g %in% hold)
     df_out$True <- data.frame(Y = rep(0,2))
     df_out$True$survives = rep( 0, 2)
     df_out$True$X = matrix(0, ncol = ncol(df$X), nrow = 2)
     df_out$True$Z = matrix(0, ncol = ncol(df$Z), nrow = 2)
     df_out$True$g = rep(0,2)
-    df_out$True$E = matrix(0, ncol = ncol(df$E), nrow = 2)
-
-  }else if( all(hold == 0) & vr == 'recruitment' ){ 
-    df_out <- split(df, df$g %in% hold)
-    df_out$True <- data.frame(Y = rep(0,2))
-    df_out$True$P1 = rep( 0, 2)
-    df_out$True$P2 = rep( 0, 2)
-    df_out$True$X = matrix(0, ncol = ncol(df$X), nrow = 2)
-    df_out$True$g = rep(0,2)
-
   }else if(any(hold > 0)){ 
     df_out <- split(df, df$g %in% hold)
   }
@@ -155,6 +144,10 @@ get_spp_and_vr <- function(dat_file, model_file){
 }
 
 process_data <- function(dat, formX, formC, formZ, formE = as.formula(~ -1), vr = 'growth', IBM = 0, ... ){
+   
+  if( vr == 'recruitment'){ 
+    return( process_recruitment_data(dat, formX, formC, formZ, IBM = IBM, ... )) 
+  }
   
   C <- model.matrix(formC, dat)
   dat$C <- scale(C)
@@ -191,10 +184,12 @@ process_data <- function(dat, formX, formC, formZ, formE = as.formula(~ -1), vr 
 }
 
 
-process_recruitment_data <- function(dat, formX, formC, IBM = 0, center = T, ... ){ 
-  vr <- 'recruitment'
+
+process_data <- function(dat, formX, formC, formZ, vr = 'growth', IBM = 0, ... ){
+  
   C <- model.matrix(formC, dat)
   dat$C <- scale(C)
+  dat$W <- scale(dat$W)
   dat$Group <- factor(dat$gid)
   
   if( ncol(dat$C) == 0 ){ 
@@ -202,24 +197,29 @@ process_recruitment_data <- function(dat, formX, formC, IBM = 0, center = T, ...
   }
   
   dat$X <- model.matrix(formX, data = dat)
-
+  dat$Z <- model.matrix(formZ, data = dat)
+  
   dat$g <- factor(dat$yid)
   
-  dat_4_IBM <- dat ### Make complete data frame for IBM simulations
+  dat_4_IBM <- dat ### Need to preserve dataframe with NA's (dead plants) for IBM simulations 
   dat_4_IBM <- split_df(dat_4_IBM, vr = vr, hold = 0)
   dl_4_IBM <- make_dl(dat_4_IBM)
   dl_4_IBM <- dl_4_IBM[-grep('hold', names(dl_4_IBM))]
   names(dl_4_IBM) <- paste0( 'IBM_', names(dl_4_IBM))
   dl_4_IBM$IBM <- IBM
   
-  dat <- split_df(dat, vr, ... )
+  if(vr == 'survival'){ 
+    dat <- split_df(dat, vr, ... )
+    dl  <- make_dl(dat)
+  }else{ 
+    dat <- dat[complete.cases(dat), ]
+    dat <- split_df(dat, vr, ... )
+    dl <- make_dl(dat)
+  }
   
-  dl <- make_dl(dat)
-  
-  dl$IBM <- IBM
-  
-  return(c(dl, dl_4_IBM))
+  return( c(dl, dl_4_IBM))
 }
+
 
 
 check_for_compiled_model <- function(vr, model_file){ 
@@ -247,8 +247,6 @@ find_dv_trans <- function(x){
   dv <- sum(   unlist( lapply( ss, function(x) sum( x[ (1 + ceiling(0.5*nrow(x))):nrow(x), 'divergent__']) )))
   return(dv)
 }
-
-
 
 translate_ci <- function( ci ){ 
   lc <- (100 - ci)/2
@@ -281,7 +279,7 @@ test_pp_intervals <- function(Y_obs, my_fit, ci = c(95,90,75,50)) {
             above = Y > upper )
 } 
 
-scale_and_fold <- function(species, small = -1, lc = 0, k = 10, filenames){
+scale_and_fold <- function(species, vr, lc = 0, small = -1,  k = 10, filenames){
   
   file_name <- filenames[ str_detect(filenames, species)  ]
   
@@ -295,16 +293,32 @@ scale_and_fold <- function(species, small = -1, lc = 0, k = 10, filenames){
     dat %>% 
     distinct(yid, folds)
   
-  dat$size <- scale( dat$logarea.t0 )
-  dat$small <- as.numeric(dat$size < small)
-  dat$Y    <- scale( dat$logarea.t1 )
+  if(vr != 'recruitment'){
+    dat$size <- scale( dat$logarea.t0 )
+    dat$small <- as.numeric(dat$size < small)
+    dat$Y    <- scale( dat$logarea.t1 )
+    intra_comp <- paste0('W.', species)
+    dat$W.intra  <- scale( dat[ , intra_comp])
+    dat$W.inter <- scale( rowSums(dat$W[, -( grep ( intra_comp , colnames(dat$W))) ] ) ) # inter specific comp. 
+  
+    dat <- left_censor_df(dat, lc )  
+    
+  }else if( vr == 'recruitment'){ 
+    
+    dat <- 
+      dat %>% 
+      ungroup %>% 
+      rowwise( ) %>% 
+      mutate( total_basal_cover = cov.HECO + cov.POSE + cov.PSSP) %>% 
+      mutate( total_open = 100*100 - total_basal_cover) %>% 
+      mutate( l_open = log(total_open))
+    
+    dat$W <- scale( dat$total_basal_cover)
+    
+    dat <- as.data.frame( dat ) 
+  }
+  
   dat$GroupP2 <- as.numeric( dat$Group == 'P2') # Paddock P2 is weird 
-  
-  intra_comp <- paste0('W.', species)
-  dat$W.intra  <- scale( dat[ , intra_comp])
-  dat$W.inter <- scale( rowSums(dat$W[, -( grep ( intra_comp , colnames(dat$W))) ] ) ) # inter specific comp. 
-  
-  dat <- left_censor_df(dat, lc )  
   
   return(dat)
 }
@@ -320,6 +334,7 @@ get_model_score <- function( model_combos,
                              nthin = 4){ 
   id <- model_combos$id                      
   sp <- model_combos$species
+  ad <- model_combos$ad
   model <- model_combos$model
   formC <- as.formula( paste0 ( '~-1 + ', model  ))  ### Climate effects design matrix 
   fold <- model_combos$fold
@@ -327,6 +342,7 @@ get_model_score <- function( model_combos,
   dat <- prepped_dfs[[sp]]  
   hold <- unique( dat$yid[ dat$folds == fold ] )
   
+
   dl <- process_data(dat = dat, 
                      formX = formX, 
                      formC = formC, 
@@ -336,7 +352,9 @@ get_model_score <- function( model_combos,
                      hold = hold, 
                      IBM = 0)
   
-  cat('\n\n')
+  if( vr == 'growth'){ 
+    ad <- 0.8
+  }
   
   fit <- stan(file = model_file, 
               data = dl, 
@@ -344,11 +362,17 @@ get_model_score <- function( model_combos,
               iter = n_iter, 
               cores = 4,
               thin = nthin,
+              control = list(adapt_delta = ad), 
               verbose = F,
               pars = c('log_lik', 'hold_log_lik', 'hold_SSE'), 
-              refresh = -1)
+              refresh = 0)
   
-  stopifnot(get_num_divergent(fit) == 0) ### stop if there are divergent transitions 
+  nd <- get_num_divergent( fit)
+  if( nd > 0 ) stop( paste0( nd,  ' Divergent transitions in model run ', id ))
+  
+  if(dim( summary(fit)$c_summary)[3] == 4){ 
+    stop( paste('missing chains for run', id ) )
+  }
   
   mx_rhat <- max(summary( fit, 'log_lik')$summary[, 'Rhat'])
   mn_rhat <- min( summary( fit, 'log_lik')$summary[, 'Rhat'])
