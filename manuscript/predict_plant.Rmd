@@ -2,7 +2,9 @@
 title: "Predicting plant responses to precipitation"
 author: "Andrew Kleinhesselink"
 date: "3/25/2019"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 csl: ecology.csl
 bibliography: precip_experiment.bib
 ---
@@ -49,7 +51,7 @@ If models based on observational data can predict the response of these well stu
 
 ## Study site and historical dataset 
 
-The U.S. Sheep Experiment Station (USSES) is located at Dubois, Idaho (44.2\degree N, 112.1\degree W), 1500 m above sea level. During the period of data collection (1926 – 2016), mean annual precipitation was 270 mm and mean temperatures ranged from -8\degree C (January) to 21\degree C (July). The vegetation is dominated by a shrub, *Artemisia tripartita*, and three perennial C3 grasses: *Pseudoroegneria spicata*, *Hesperostipa comata*, and *Poa secunda*. These dominant species account for over 70\% of basal cover and 60\% of canopy cover at this site. 
+The U.S. Sheep Experiment Station (USSES) is located at Dubois, Idaho (44.2\\degree N, 112.1\\degree W), 1500 m above sea level. During the period of data collection (1926 – 2016), mean annual precipitation was 270 mm and mean temperatures ranged from -8\\degree C (January) to 21\\degree C (July). The vegetation is dominated by a shrub, *Artemisia tripartita*, and three perennial C3 grasses: *Pseudoroegneria spicata*, *Hesperostipa comata*, and *Poa secunda*. These dominant species account for over 70\% of basal cover and 60\% of canopy cover at this site. 
 
 Scientists at the USSES established 26 1-m$^2$ quadrats between 1926 and 1932. Eighteen quadrats were distributed among four ungrazed exclosures, and eight were distributed in two paddocks grazed at medium intensity spring through fall. All quadrats were located on similar topography and soils. In most years until 1957, all individual plants in each quadrat were mapped using a pantograph (@blaisdell_seasonal_1958). The historical data set is public and available online (@zachmann_mapped_2010). In 2007, we located 14 of the original quadrats, all of which are inside permanent livestock exclosures, and resumed annual mapped censusing using the traditional pantograph method. Daily temperature and precipitation has been monitored throughout this period at a climate station located at the USSES headquarters (station id: GHCND:USC00102707) which located within 2 km of the research plots.  We downloaded daily and monthly tmin, tmax, and precipitation data from the National Climate Data Centers online database.  
 
