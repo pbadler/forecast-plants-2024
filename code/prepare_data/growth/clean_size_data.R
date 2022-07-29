@@ -1,4 +1,5 @@
 rm(list = ls())
+library(tidyverse)
 #########################################
 #  1. Import data, merge treatment effects and save out 
 #########################################
@@ -87,6 +88,6 @@ for( i in 1:4) {
   allD$pid <- paste0( allD$quad, '_', allD$trackID)
 
   # save the size data 
-  saveRDS(allD, paste0( 'data/temp_data/', doSpp, '_size.RDS')) 
+  write_csv(allD, paste0( 'data/temp_data/', doSpp, '_size.csv')) 
 
 }

@@ -14,7 +14,6 @@ for( i in results_files){
   load(i)
 }
 
-ARTR_growth_weekly_ClimWin$combos
 
 # Functions for processing slidingwin results: 
 get_calendar_dates <- function( x , foo_year = 1999, ref_date = '06-15') { 
