@@ -1,6 +1,6 @@
 # 
-.rda
-.rds
+*.rda
+*.rds
 
 # History files
 .Rhistory
@@ -46,3 +46,5 @@ vignettes/*.pdf
 *.jpeg
 *.jpg
 
+# 
+*.DS_Store
