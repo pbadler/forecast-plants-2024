@@ -78,6 +78,6 @@ allD$Treatment3[allD$Treatment=="Control" & allD$year>2000] <- "ControlModern"
 
 # ----------- use this data for prediction ------------------------------------------------------------------------------
 
-saveRDS(allD, 'data/temp_data/HECO_growth.RDS') 
+write.csv(allD, 'data/temp/HECO_growth.csv') 
 
 # -----------------------------------------------------------------------------------------------------------------------

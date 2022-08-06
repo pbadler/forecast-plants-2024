@@ -44,7 +44,7 @@ area <-
 area <- 
   all_quads %>% 
   left_join(area, by = c('QuadName', 'year')) %>% 
-  gather( spp, area, sppList ) %>% 
+  gather( spp, area, all_of(sppList)) %>% 
   mutate( area = ifelse(is.na(area), 0, area)) %>% ## fill in zeros 
   mutate( cover = 100*area ) 
 
@@ -60,5 +60,5 @@ cover <-
   dplyr::select(QuadName, Treatment, Group, year, spp, area, cover)
 
 
-saveRDS( cover, 'data/temp_data/all_cover.RDS')  
+write_csv( cover, 'data/temp/all_cover.csv')  
   

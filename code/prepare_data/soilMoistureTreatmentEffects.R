@@ -5,7 +5,7 @@ rm(list = ls())
 library(tidyverse)
 library(lubridate)
 library(lme4)
-library(lsmeans)
+library(emmeans)
 library(texreg)
 library(sheepweather)
 
@@ -16,15 +16,15 @@ load('code/figure_scripts/my_plotting_theme.Rdata')
 spotVWC <- usses_spot_sm
 decVWC <- usses_decagon
 
-daily_clim <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS')  # climate station rainfall
+daily_clim <- read_csv('data/temp/daily_station_dat_rainfall.csv')
 
 seasons <- read.csv('data/season_table.csv')
 quads <- read_csv('data/quad_info.csv')
 
 # output ---------------------------------------------------- #
 
-treatment_effects_model_outfile <- 'output/treatment_sm_model.RDS'
-daily_sm_outfile <- 'data/temp_data/daily_sm.RDS'
+treatment_effects_model_outfile <- 'data/temp/treatment_sm_model.rds'
+daily_sm_outfile <- 'data/temp/daily_sm.csv'
 
 # --------------------------------------------------------------------------------------#
 
@@ -56,6 +56,7 @@ spotVWC <-
   group_by( type, date, PrecipGroup, Treatment, plot ) %>% 
   summarise( v = mean(VWC, na.rm = T), weight = n() ) 
 
+
 daily_sm <- 
   bind_rows(decVWC, spotVWC)  %>% 
   group_by( date) %>% 
@@ -73,5 +74,5 @@ AIC(m1, m2)
 
 summary(m2)
 
-saveRDS(m2, treatment_effects_model_outfile)
-saveRDS(daily_sm, daily_sm_outfile)
+write_rds(m2, file = treatment_effects_model_outfile)
+write_csv(daily_sm, file = daily_sm_outfile)

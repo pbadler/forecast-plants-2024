@@ -5,13 +5,13 @@ library(stringr)
 
 rm(list = ls())
 
-df_list <- dir('data/temp_data', '[A-Z]{4}_growth.RDS', full.names = T)
+df_list <- dir('data/temp', '[A-Z]{4}_growth.csv', full.names = T)
 
 for( i in 1:length(df_list)){ 
 
   spp <- strsplit(basename(df_list[i]), '_')[[1]][ 1]
   
-  df <- readRDS(df_list[i])
+  df <- read_csv(df_list[i])
 
   df <- subset(df, Period == 'Historical')
 

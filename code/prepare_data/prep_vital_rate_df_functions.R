@@ -22,8 +22,8 @@ set_up_basic_vars <- function(x){
 }
 
 clean_growth_survival <- function(clim, growth_file, survival_file){
-  gdat <- readRDS( growth_file)
-  sdat <- readRDS( survival_file)
+  gdat <- read_csv( growth_file)
+  sdat <- read_csv( survival_file)
   
   # merge growth, survival and climate data -------------------------------------- #
   sdat$logarea.t0 <- sdat$logarea
@@ -48,7 +48,7 @@ clean_recruitment <- function(clim, recruitment_file){
   
   require(stringr)
   
-  x <- readRDS( recruitment_file)
+  x <- read_csv( recruitment_file)
   x$Period <- ifelse(x$year > 2010, "Modern", "Historical")
   x <- merge(x, clim )
   
@@ -99,7 +99,7 @@ add_climate_combos <- function(dat){
   VWC_combos <- make_my_climate_combos()
   T_combos <- make_my_climate_combos(prefix = 'C.T.')
   
-  save(VWC_combos, T_combos, file = 'data/temp_data/climate_combos.RData')
+  save(VWC_combos, T_combos, file = 'data/temp/climate_combos.RData')
   
   VWC.spring <- lapply( VWC_combos, function(x,df) apply( as.matrix( df[,x] ), 1, mean ) , df = dat)
   T.spring <- lapply( T_combos, function(x,df) apply( as.matrix(df[,x]), 1, mean), df = dat)
@@ -111,7 +111,7 @@ add_climate_combos <- function(dat){
 }
 
 scale_climate_vars <- function( clim_file, clim_vars){ 
-  clim <- readRDS(clim_file)  
+  clim <- read_csv(clim_file)  
   clim <- clim[ ,c('Treatment', 'year', clim_vars)]
   names ( clim ) [ grep( '^(P\\.)|(VWC\\.)|(T\\.)',  names( clim ) ) ] <- paste0 ( 'C.', names( clim ) [ grep( '^(P\\.)|(VWC\\.)|(T\\.)', names(clim ) ) ] )
   clim <- clim[ complete.cases(clim), ] 

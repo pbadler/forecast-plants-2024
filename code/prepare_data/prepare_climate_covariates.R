@@ -10,12 +10,12 @@ rm(list = ls() )
 
 # ------- load files ------------------------------------------------------------------ 
 
-seasonal_clim <- readRDS('data/temp_data/seasonal_climate.RDS')
-seasonal_VWC  <- readRDS('data/temp_data/seasonal_VWC.RDS')
+seasonal_clim <- read_csv('data/temp/seasonal_climate.csv')
+seasonal_VWC  <- read_csv('data/temp/seasonal_VWC.csv')
 
 # ------- output ------------------------------------------------------------------ 
 
-outfile = 'data/temp_data/all_clim_covs.RDS'
+outfile = 'data/temp/all_clim_covs.csv'
 
 # ------ calculate seasonal lags -----------------------------------------------------# 
 #
@@ -89,7 +89,9 @@ q_precip <-
          P.su.0 = lag(P.su.1, 4), 
          P.su.l = lag(P.su.0, 4), 
          P.w.sp.1 = rollsum(val, 2, align = 'right', fill = NA), 
-         P.sp.su.0 = lag(P.w.sp.1, 3)) %>% 
+         P.sp.su.0 = lag(P.w.sp.1, 3), 
+         P.f.w.sp.1 = rollsum(val, 3, na.rm = T, align = 'right', fill = NA), 
+         P.sp.su.f.0 = lag(P.f.w.sp.1, 2)) %>% 
   filter( season == 'spring') %>% # plants are measured at the end of spring each year 
   dplyr::select( Treatment, Period, year, season, starts_with("P"))
 
@@ -98,14 +100,17 @@ q_temp <-
   filter( var == 'TAVG_avg' ) %>% 
   group_by(Treatment) %>% 
   arrange(Treatment, year, season) %>% 
-  mutate( T.sp.1 = val, 
+  mutate( T.a.1  = rollmean(val, 4, align = 'right', fill = NA), 
+          T.a.0  = lag(T.a.1, 4),
+          T.sp.1 = val, 
           T.sp.0 = lag(T.sp.1, 4),
           T.su.1 = lag(val, 3), 
           T.su.0 = lag(T.su.1, 4), 
           T.f.1 = lag(val, 2), 
           T.f.0 = lag(T.f.1, 4), 
           T.w.1 = lag(val, 1), 
-          T.w.0 = lag(T.w.1, 4)) %>% 
+          T.f.w.sp.1 = rollapply(val, 3, 'mean', na.rm = T, align = 'right', fill = NA), 
+          T.sp.su.f.0 = lag(T.f.w.sp.1, 2)) %>% 
   filter( season == 'spring') %>% 
   dplyr::select( Treatment, Period, year, season, starts_with("T."))
 
@@ -130,16 +135,24 @@ allClim$year <- allClim$year - 1 # adjust to match assignment of year 0 as the r
 allClim <- data.frame(allClim)
 
 # include interactions between temperature and VWC for each season
+( names( allClim))
+
 VWCvars <- which(is.element(substring(names(allClim),1,2),"VW")==T)
 tmp_dat <- matrix(NA,nrow(allClim),length(VWCvars))
 colnames(tmp_dat) <- paste0("VWCxT.",substring(names(allClim)[VWCvars],5))
+
 for(i in 1:length(VWCvars)){
   do_season <- substring(names(allClim)[VWCvars[i]],5)
   iT <- which(names(allClim)==paste0("T.",do_season))
+  names(allClim)  
+  do_season
   tmp_dat[,i] <- allClim[,VWCvars[i]]*allClim[,iT]
+  
+  tmp_dat[, i]
 }
+
 allClim <- cbind(allClim,tmp_dat)
 
 # ---- output ----------------------------------------------------------------------------# 
 
-saveRDS( allClim , outfile ) 
+write_csv( allClim , file = outfile ) 

@@ -51,24 +51,25 @@ source('code/figure_scripts/plot_longterm_TAVG.R')
 source('code/figure_scripts/plot_cover.R')
 
 # ----- Model Fitting/Selection ---------------------------------- # 
+# Use sliding windows from ClimWin package find best climate windows 
+# for growth and survival of each species. 
 
-# 3. Fit candidate models and evaluate using K-Fold cross validation
+source('code/analysis/prep_daily_weather.R')
+source('code/analysis/growth_daily_climWin.R')
 
-source('code/analysis/fit_growth_models.R') # takes a while 
+## WARNING ## !!!!!!!!!!!!!!!! TAKES MANY HOURS TO RUN !!!! 
+source('code/analysis/survival_daily_climWin.R') # !!!!!!!
 
-source('code/analysis/fit_survival_models.R') # takes a while 
+source('code/analysis/plot_window_comparisons.R')
 
-source('code/analysis/fit_recruitment_models.R') # takes a while 
+# Refit models with chosen climate windows 
+source('code/analysis/train_growth_models.R')
+source('code/analysis/train_survival_models.R')
 
-# 4. Rank models based on LPPD 
+# Validate model performance 
+source('code/analysis/growth_validation.R')
+source('code/analysis/survival_validation.R')
 
-source('code/analysis/rank_models.R')
-
-# 5. Re-run top models for each species and vital rate 
-
-source('code/analysis/fit_top_survival_models.R')
-source('code/analysis/fit_top_growth_models.R')
-source('code/analysis/fit_top_recruitment_models.R')
 
 # ------ Simulation ---------------------------------------------  #
 

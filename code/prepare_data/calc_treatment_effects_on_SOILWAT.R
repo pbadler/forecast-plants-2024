@@ -5,12 +5,12 @@ library(lme4)
 library(sheepweather)
 
 # output --------------------------------------------------------------- # 
-outfile <- 'data/temp_data/daily_swVWC_treatments.RDS'
+outfile <- 'data/temp/daily_swVWC_treatments.csv'
 
 # input ---------------------------------------------------------------- # 
-rain_data <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS')
+rain_data <- read_csv('data/temp/daily_station_dat_rainfall.csv')
 sw <- sheepweather::usses_soilwat
-sm_model <- readRDS('output/treatment_effects_on_soil_moisture.RDS')
+sm_model <- read_rds('data/temp/treatment_sm_model.rds')
 seasons <- read_csv('data/season_table.csv')
 
 # ----------------------------------------------------------------------- # 
@@ -52,6 +52,6 @@ sw_treatment <-
   left_join(pred_df, by ='date') %>% 
   mutate( VWC = swVWC*pred)
 
-saveRDS(sw_treatment, outfile)
+write_csv(sw_treatment, file = outfile)
 
 

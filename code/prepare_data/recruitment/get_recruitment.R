@@ -100,7 +100,7 @@ D$species <- str_replace(D$species, pattern = '^R.', replacement = '')
 D <- split(D, D$species )
 
 for(i in 1:length(D)){
-  saveRDS(D[[i]], file.path('data', 'temp_data', paste(names(D)[i], 'recruitment.RDS', sep = '_')))
+  write.csv(D[[i]], file.path('data', 'temp', paste(names(D)[i], 'recruitment.csv', sep = '_')))
 }
 
 

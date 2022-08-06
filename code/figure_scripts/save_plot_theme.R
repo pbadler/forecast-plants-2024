@@ -22,4 +22,4 @@ species_names <- c(bquote( italic('Artemisia')), bquote(italic('Hesperostipa')),
 
 pdf_settings <- c('height' = 5, width = 5 ) 
 
-save(my_colors, species_names, my_theme, file = 'code/figure_scripts/my_plotting_theme.Rdata')
+save(my_colors, species_names, my_theme, file = 'data/temp/my_plotting_theme.Rdata')

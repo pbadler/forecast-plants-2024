@@ -88,6 +88,6 @@ for( i in 1:4) {
   allD$pid <- paste0( allD$quad, '_', allD$trackID)
 
   # save the size data 
-  write_csv(allD, paste0( 'data/temp_data/', doSpp, '_size.csv')) 
+  write_csv(allD, paste0( 'data/temp/', doSpp, '_size.csv')) 
 
 }

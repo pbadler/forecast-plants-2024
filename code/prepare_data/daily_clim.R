@@ -4,7 +4,13 @@ library(lubridate)
 library(imputeTS)
 library(pollen)
 
+sheepweather::usses_weather %>% head 
+daily %>% head 
+sheepweather::usses_soilwat
+
 daily <- read_csv('~/Dropbox/projects/sheepweather/data-raw/daily_station_data_ncdc_download.csv')
+daily
+
 load('~/Dropbox/projects/sheepweather/data/usses_soilwat.rda')  
 
 daily <- 

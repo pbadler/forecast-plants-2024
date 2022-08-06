@@ -22,9 +22,9 @@ weather <- usses_weather
 
 # output --------------------------------------------------------------------#
 
-seasonal_output <- 'data/temp_data/seasonal_climate.RDS' # need this one for prepare climate coveriates script 
-monthly_output <- 'data/temp_data/monthly_climate.RDS' # used by plot modern climate 
-annual_output <- 'data/temp_data/annual_climate.RDS' # used by plot modern climate 
+seasonal_output <- 'data/temp/seasonal_climate.csv' # need this one for prepare climate coveriates script 
+monthly_output <- 'data/temp/monthly_climate.csv' # used by plot modern climate 
+annual_output <- 'data/temp/annual_climate.csv' # used by plot modern climate 
 
 # --------------------------------------------------------------------#
 
@@ -109,6 +109,6 @@ annual_clim <- left_join( annual_clim, periods, by = "YEAR" )
 
 # -------- output -----------------------------------------------------------------------------#
 
-saveRDS( seasonal_clim, file = seasonal_output)
-saveRDS( monthly_clim, file = monthly_output)
-saveRDS( annual_clim, file = annual_output)
+write_csv( seasonal_clim, file = seasonal_output)
+write_csv( monthly_clim, file = monthly_output)
+write_csv( annual_clim, file = annual_output)

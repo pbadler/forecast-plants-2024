@@ -73,6 +73,6 @@ allD$Treatment3[allD$Treatment=="Control" & allD$year>2000] <- "ControlModern"
 
 # ----------- use this data for prediction ------------------------------------------------------------------------------
 
-saveRDS(allD, 'data/temp_data/ARTR_survival.RDS') 
+write.csv(allD, 'data/temp/ARTR_survival.csv') 
 
 # -----------------------------------------------------------------------------------------------------------------------

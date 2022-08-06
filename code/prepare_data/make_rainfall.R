@@ -11,7 +11,7 @@ weather <- usses_weather # use sheepweather package
 
 # output ---------------------------------------------------- #
 
-rainfall_outfile <- 'data/temp_data/daily_station_dat_rainfall.RDS'
+rainfall_outfile <- 'data/temp/daily_station_dat_rainfall.csv'
 
 # ---------------------------------------------------------------------------------------
 
@@ -64,4 +64,5 @@ weather <-
   mutate( days_since_rain = row_number()) %>% 
   mutate( inv_days_since_rain = total_rain/days_since_rain )
 
-saveRDS(weather, rainfall_outfile )
+write_csv(weather, file = rainfall_outfile)
+

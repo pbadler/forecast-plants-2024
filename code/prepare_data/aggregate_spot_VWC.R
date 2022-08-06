@@ -8,14 +8,14 @@ library(sheepweather)
 # input ---------------------------------------------------- #
 seasons <- read.csv('data/season_table.csv')
 
-daily_clim <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS') 
+daily_clim <- readRDS('data/temp/daily_station_dat_rainfall.csv') 
   # comes from 'make_rainfall.R'
 
 spotVWC <- usses_spot_sm # comes from package
 
 # output ---------------------------------------------------- #
 
-outfile <- 'data/temp_data/spotVWC.RDS'
+outfile <- 'data/temp/spotVWC.csv'
 
 # ---------------------------------------------------- #
 
@@ -50,5 +50,5 @@ spotVWC <-
   left_join(spot_weights, by = c('date', 'PrecipGroup'))
 
 
-saveRDS(spotVWC, outfile)
+write_csv(spotVWC, file = outfile)
 

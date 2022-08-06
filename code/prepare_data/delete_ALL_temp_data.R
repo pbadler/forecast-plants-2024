@@ -5,5 +5,5 @@
 # "make_all_data.R" script  
 # 
 
-file.remove(dir('data/temp_data', full.names = T))
+file.remove(dir('data/temp', full.names = T))
 

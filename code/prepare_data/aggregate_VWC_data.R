@@ -13,14 +13,13 @@ library(zoo)
 
 load('code/figure_scripts/my_plotting_theme.Rdata')
 
-df <- readRDS('data/temp_data/daily_swVWC_treatments.RDS')
-  # comes from the soilMoistureTreatmentEffects script 
+df <- read_csv('data/temp/daily_swVWC_treatments.csv')
+# comes from the soilMoistureTreatmentEffects script 
 
 # output ---------------------------------------------------- # 
-
-seasonal_outfile <- 'data/temp_data/seasonal_VWC.RDS'
-annual_outfile <- 'data/temp_data/annual_VWC.RDS'
-monthly_outfile <- 'data/temp_data/monthly_avg.RDS'
+seasonal_outfile <- 'data/temp/seasonal_VWC.csv'
+annual_outfile <- 'data/temp/annual_VWC.csv'
+monthly_outfile <- 'data/temp/monthly_avg.csv'
 
 # make time periods --------------------------------------------------------------------
 
@@ -63,6 +62,7 @@ monthly_avg <-
 
 # -------- output -----------------------------------------------------------------------------#
 
-saveRDS( seasonal_VWC, seasonal_outfile) 
-saveRDS( annual_VWC, annual_outfile) 
-saveRDS( monthly_avg, monthly_outfile)
+write_csv( seasonal_VWC, file = seasonal_outfile) 
+write_csv( annual_VWC, file = annual_outfile) 
+write_csv( monthly_avg, file = monthly_outfile)
+
