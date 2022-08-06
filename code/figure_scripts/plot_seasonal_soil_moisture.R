@@ -7,9 +7,9 @@ library(zoo)
 
 load('code/figure_scripts/my_plotting_theme.Rdata')
 
-seasonal_VWC <- readRDS('data/temp_data/seasonal_VWC.RDS') 
-annual_VWC <- readRDS('data/temp_data/annual_VWC.RDS')
-monthly_avg <- readRDS('data/temp_data/monthly_avg.RDS')
+seasonal_VWC <- read.csv('data/temp/seasonal_VWC.csv') 
+annual_VWC <- read.csv('data/temp/annual_VWC.csv')
+monthly_avg <- read.csv('data/temp/monthly_avg.csv')
 
 seasonal_VWC <- 
   seasonal_VWC %>% 

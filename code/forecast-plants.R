@@ -1,27 +1,27 @@
 ############################################################# 
 #
-# NOTE: Running all the K-fold cross validation takes days 
+#
 #
 #############################################################
 
 rm(list = ls() ) 
-
 # library(sheepweather) # in-house package for weather data!!! 
 # see https://github.com/akleinhesselink/sheepweather
 
-# library(rstan)
 # library(tidyverse)
+# library(sheepweather)
+# library(lubridate)
 # library(zoo)
 # library(texreg)
 # library(xtable)
 # library(gridExtra)
 # library(MASS)
-# library(lsmeans)
+# library(emmeans)
 # library(lme4)
 # library(egg)
+# library( optimx )
 
 # run data preparation files first --------------------------- # 
-
 source('code/figure_scripts/save_plot_theme.R')
 
 source('code/prepare_data/make_all_data.R') # takes a minute or two 
@@ -53,8 +53,8 @@ source('code/figure_scripts/plot_cover.R')
 # ----- Model Fitting/Selection ---------------------------------- # 
 # Use sliding windows from ClimWin package find best climate windows 
 # for growth and survival of each species. 
-
 source('code/analysis/prep_daily_weather.R')
+
 source('code/analysis/growth_daily_climWin.R')
 
 ## WARNING ## !!!!!!!!!!!!!!!! TAKES MANY HOURS TO RUN !!!! 

@@ -1,6 +1,6 @@
 rm(list = ls())
 
-library( tidyverse )
+library(tidyverse )
 library(zoo) # for rollapply
 library(lubridate)
 library(sheepweather)

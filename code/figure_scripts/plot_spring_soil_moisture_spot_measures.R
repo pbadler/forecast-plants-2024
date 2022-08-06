@@ -3,7 +3,7 @@ rm(list = ls())
 library(tidyverse)
 library(texreg)
 library(lme4)
-library(lsmeans)
+library(emmeans)
 
 # input ---------------------------------------------------- # 
 load('code/figure_scripts/my_plotting_theme.Rdata')
@@ -97,7 +97,7 @@ aggregate(data = df, VWC ~ Treatment, FUN = 'mean')
 11.42/8.16
 
 # make table for stats output 
-test <- lsmeans(spot_m , "Treatment" )
+test <- emmeans(spot_m , "Treatment" )
 
 texreg(spot_m,caption="Estimated parameters from a mixed effects model fit to the spring soil moisture data. Parameter with s.e. are shown. Intercept gives soil moisture in ambient controls.",
        caption.above=TRUE,file=statsTable, label = 'table:spotVWC')

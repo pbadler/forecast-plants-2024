@@ -10,9 +10,9 @@ fig1_file <- 'figures/avg_daily_soil_moisture.png'
 fig2_file <- 'figures/modeled_soilwat_soil_moisture_example.pdf'
 
 # input ---------------------------------------------------------------- # 
-sm_model <- readRDS('output/treatment_effects_on_soil_moisture.RDS')
-daily_sm <- readRDS('data/temp_data/daily_sm.RDS')
-weather <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS')
+sm_model <- readRDS('data/temp/treatment_sm_model.rds')
+daily_sm <- read_csv('data/temp/daily_sm.csv')
+weather <- read_csv('data/temp/daily_station_dat_rainfall.csv')
 seasons <- read_csv('data/season_table.csv')
 # ---------------------------------------------------------------------- # 
 
@@ -38,7 +38,6 @@ pred_df <-
   mutate(month = month(date)) %>% 
   left_join(seasons %>% select(month, season), by = 'month') %>% 
   data.frame()
-
 
 pred_df$pred <- predict(sm_model, newdata = pred_df, re.form = NA )
 

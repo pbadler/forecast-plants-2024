@@ -10,7 +10,7 @@ load('code/figure_scripts/my_plotting_theme.Rdata')
 
 species <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
-cover <- readRDS('data/temp_data/all_cover.RDS')
+cover <- read_csv('data/temp/all_cover.csv')
 
 cover$spp <- factor( cover$spp, labels = c('Artemisia', 'Hesperostipa', 'Poa', 'Pseudoroegneria'))
 

@@ -8,7 +8,7 @@ library(sheepweather)
 # input ---------------------------------------------------- #
 seasons <- read.csv('data/season_table.csv')
 
-daily_clim <- readRDS('data/temp/daily_station_dat_rainfall.csv') 
+daily_clim <- read_csv('data/temp/daily_station_dat_rainfall.csv') 
   # comes from 'make_rainfall.R'
 
 spotVWC <- usses_spot_sm # comes from package

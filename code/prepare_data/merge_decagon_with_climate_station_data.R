@@ -7,12 +7,12 @@ library(sheepweather)
 
 decagon <- usses_decagon # comes from sheepweather package 
 
-rainfall <- readRDS('data/temp_data/daily_station_dat_rainfall.RDS')
-  # comes from the make_rainfall script
+rainfall <- read_csv('data/temp/daily_station_dat_rainfall.csv')
+# comes from the make_rainfall script
 
 # output ---------------------------------------------------- #
 
-decagon_outfile <- 'data/temp_data/decagon_data_with_station_data.RDS'
+decagon_outfile <- 'data/temp/decagon_data_with_station_data.RDS'
 
 # ---------------------------------------------------------------------------------------
 

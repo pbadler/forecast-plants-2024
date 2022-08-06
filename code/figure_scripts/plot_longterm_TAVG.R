@@ -6,7 +6,7 @@ library(tidyverse)
 
 load('code/figure_scripts/my_plotting_theme.Rdata')
 
-seasonal <- readRDS('data/temp_data/seasonal_climate.RDS')
+seasonal <- read_csv('data/temp/seasonal_climate.csv')
 
 seasonal <- 
   seasonal %>% 

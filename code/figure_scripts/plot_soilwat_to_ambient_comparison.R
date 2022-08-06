@@ -12,7 +12,7 @@ fig_file <- 'figures/soilwat_v_ambient_obs.png'
 load('code/figure_scripts/my_plotting_theme.Rdata')
 
 sw <- sheepweather::usses_soilwat
-daily_sm <- readRDS('data/temp_data/daily_sm.RDS')
+daily_sm <- read_csv('data/temp/daily_sm.csv')
 seasons <- read_csv('data/season_table.csv')
 
 # ----------------------------------------------------------------------- # 
