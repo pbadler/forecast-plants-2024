@@ -59,7 +59,7 @@ cv_out %>%
   mutate( Treatment = 'Control', Period = 'Historical') %>% 
   pivot_longer(cols = R2:BIC) %>% unite( col = 'stat', c(name, mtype)) %>% 
   pivot_wider(names_from = stat, values_from = value) %>% 
-  write_csv('output/cross_validation_growth_performance.csv')
+  write_csv('output/growth_models/in_sample_cv_growth_models.csv')
 
 # Out of sample validation 
 out <- list( list()  , list(), list() , list() )
@@ -111,7 +111,7 @@ oos_performance <- do.call(bind_rows, out)
 
 oos_performance %>% 
   mutate( Period = 'Experimental') %>% 
-  write_csv('output/oos_growth_performance.csv')
+  write_csv('output/oos_growth_validation.csv')
 
 
 

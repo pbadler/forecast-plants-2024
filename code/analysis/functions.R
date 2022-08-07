@@ -50,40 +50,6 @@ prep_growth_for_climWin <- function( species, last_year, quad_info, size_cutoff 
   return( growth )
 }
 
-prep_survival_for_climWin <- function( species, last_year, quad_info, size_cutoff = -1 ) { 
-  
-  intra <- paste0( 'W.' , species )
-  dat <- read_csv( paste0 ( 'data/temp/', paste0( species, '_survival.csv')))
-  dat <- dat[ dat$year < last_year, ]
-  mnyear <- min(dat$year)
-  mxyear <- max(dat$year)
-  pid <- unique( dat$pid )
-  
-  dat <- 
-    expand.grid(year = mnyear:mxyear, pid = unique(pid)) %>% 
-    mutate( quad = str_extract(pid, "[A-z0-9]+(?=_)"))   %>% 
-    left_join(dat, by = c('quad', 'pid', 'year'))  %>% 
-    arrange(pid, year) 
-  
-  my_dat <- 
-    dat %>% 
-    dplyr::select(quad, pid, age, year, area, starts_with('W.'))  %>% 
-    mutate( W.intra = eval(parse(text = intra)))
-  
-  growth <- my_dat %>% 
-    left_join(quad_info, by = 'quad') %>% 
-    group_by( pid ) %>% 
-    arrange(pid, year) %>% 
-    mutate(area = log(area))  %>% 
-    mutate( area0 = lag(area)) %>% 
-    arrange( pid, year ) %>% 
-    filter(!is.na( area ), !is.na(area0))  %>% 
-    filter( area0 > size_cutoff ) %>% 
-    mutate( climate = 1) %>% 
-    mutate( date_reformat  = paste0( "15/06/", year)) 
-  
-  return( growth )
-}
 
 
 prep_survival_for_climWin <- function( species, last_year, quad_info){ 
@@ -175,6 +141,25 @@ my_delta_plot <- function( climWinFit, temp_par ){
         LETTERS[temp_par$fit] , ') ', 
         paste( unlist( temp_par[, 'climate']), collapse = ', ')
         )) + 
+    theme( plot.title = element_text( size = 10, hjust = 0), 
+           legend.position = 'right', 
+           axis.text =  element_text(face = 'plain'), 
+           axis.title =  element_text(face = 'plain'))
+}
+
+my_beta_plot <- function( climWinFit, temp_par ){ 
+  
+  beta_plot <- plotbetas(climWinFit[[temp_par$fit]][[temp_par$index]]$Dataset)
+  
+
+  beta_plot <- 
+    beta_plot + 
+    guides(fill = guide_colorbar( 'Beta')) + 
+    ggtitle( 
+      paste0(
+        LETTERS[temp_par$fit + 2 ] , ') ', 
+        paste( unlist( temp_par[, 'climate']), collapse = ', ')
+      )) + 
     theme( plot.title = element_text( size = 10, hjust = 0), 
            legend.position = 'right', 
            axis.text =  element_text(face = 'plain'), 
@@ -380,6 +365,43 @@ cross_validate_survival <- function ( model, data, folds ){
   
 }
 
+plot_small_plant_windows <- function(growth_windows, sp ) { 
+  
+  temp_windows <- growth_windows %>% 
+    filter( species == sp) 
+  temp_par <- temp_windows[1, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
+  
+  # load results file for the current species
+  load(file = paste0( 'output/growth_models/', sp,  '_small_plant_', temp_par$type[1], '_mer_monthly_ClimWin.rda'))
+  temp_obj <- ls()[str_detect( ls(), sp) & str_detect(ls(), temp_par$type[1])]  
+  results <- eval(parse(text = temp_obj))  
+  
+  # First climate variable ----------------# 
+  fit1 <- my_delta_plot(results, temp_par)
+  beta1 <- my_beta_plot(results, temp_par)
+  
+  #var2_title <- paste0( temp_par$climate, ' (', temp_par$WindowOpen, ' - ' , temp_par$WindowClose, ' mos. back)')
+  
+  temp_par <- temp_windows[2, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
+  fit2 <- my_delta_plot(results, temp_par)
+  
+  beta2 <- my_beta_plot(results, temp_par)
+  
+  temp_title <- paste0( temp_par[, c('species', 'type')], collapse = ' small plant ')
+  
+  
+  png(filename = paste0('figures/', str_squish(temp_title), "_window_plots.png"),
+      width = 7,
+      height = 6,
+      units = 'in',
+      res = 300)
+  
+  grid.arrange(fit1, fit2, beta1, beta2, nrow = 2, 
+               top = text_grob(temp_title, size = 12))
+  
+  dev.off() 
+  
+}
 
 
 

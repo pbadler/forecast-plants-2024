@@ -7,7 +7,7 @@ size_cutoff <- -1  # log scale size cutoff between large and small
 quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 
-survival_windows <- read_csv('data/temp/top_survival_windows.csv')
+survival_windows <- read_csv('output/survival_models/top_survival_windows.csv')
 species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 sp <- 'ARTR'

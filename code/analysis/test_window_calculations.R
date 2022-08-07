@@ -1,5 +1,5 @@
 rm(list = ls())
-library(lmer)
+library(lme4)
 library(tidyverse)
 source('code/analysis/functions.R')
 
@@ -37,8 +37,8 @@ size <- size %>%
 
 model <- lmer( area ~ area0 + (1|year) , data = size )
 
-open <- 10
-close <- 1
+open <- 24
+close <- 24
 
 test <- singlewin(
   list( TMAX = daily_weather$TMAX) , 

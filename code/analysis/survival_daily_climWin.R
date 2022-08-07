@@ -33,15 +33,16 @@ for(species in sp_list){
                                         last_year = last_year, 
                                         quad_info = quad_info)
   
-  # m_baseline <- glmer(
-  #   survives ~ area0*climate + W.intra + (1|year/Group),
-  #   data = survival,
-  #   family = 'binomial', 
-  #   control = glmerControl(optimizer = 'bobyqa'))
+  m_baseline <- glmer(
+    survives ~ area0*climate + W.intra + (1|year/Group),
+    data = survival,
+    family = 'binomial',
+    control = glmerControl(optimizer = 'bobyqa'))
+
+  model_type <- "mer"
   
-  #model_type <- "mer"
-  m_baseline <- glm( survives ~ 1 + area0*climate + W.intra, data = survival, family = 'binomial')
-  model_type <- "glm"
+  # m_baseline <- glm( survives ~ 1 + area0*climate + W.intra, data = survival, family = 'binomial')
+  # model_type <- "glm"
   
   write_csv( survival, paste0( 'data/temp/', species, '_ClimWin_Survival_data.csv'))
   write_rds( m_baseline, paste0( 'output/survival_models/', species, '_survival_baseline_model_', model_type, '.rds'))
