@@ -54,15 +54,15 @@ source('code/figure_scripts/plot_cover.R')
 # Use sliding windows from ClimWin package find best climate windows 
 # for growth and survival of each species. 
 source('code/analysis/prep_daily_weather.R')
-
 source('code/analysis/growth_daily_climWin.R')
 
 ## WARNING ## !!!!!!!!!!!!!!!! TAKES MANY HOURS TO RUN !!!! 
 source('code/analysis/survival_daily_climWin.R') # !!!!!!!
 
+# plot  windows and save best windows to tables 
 source('code/analysis/plot_window_comparisons.R')
 
-# Refit models with chosen climate windows 
+# Refit models with chosen climate windows and save to output folder 
 source('code/analysis/train_growth_models.R')
 source('code/analysis/train_survival_models.R')
 
