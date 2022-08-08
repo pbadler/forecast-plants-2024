@@ -1,0 +1,9 @@
+response,climate,type,stat,func,DeltaAICc,WindowOpen,WindowClose,index,fit,species
+area,TMAX_scaled,growth,mean,lin,-37.07,7,7,1,1,ARTR
+area,VWC_scaled,growth,mean,lin,-22.07,13,1,1,2,ARTR
+area,TAVG_scaled,growth,mean,lin,-25.32,13,5,2,1,HECO
+area,VWC_scaled,growth,mean,lin,-8.96,12,9,1,2,HECO
+area,TMAX_scaled,growth,mean,lin,-17.9,2,1,1,1,POSE
+area,VWC_scaled,growth,mean,lin,-6.84,11,6,1,2,POSE
+area,TMIN_scaled,growth,mean,lin,-63.07,10,8,3,1,PSSP
+area,VWC_scaled,growth,mean,lin,-35.13,7,7,1,2,PSSP

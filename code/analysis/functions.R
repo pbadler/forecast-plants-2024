@@ -336,6 +336,7 @@ cross_validate_growth <- function ( model, data, folds){
 }
 
 
+
 cross_validate_survival <- function ( model, data, folds ){ 
   out <- list( AUC = NA , RMSE = NA )
   
