@@ -40,9 +40,8 @@ for( sp in species_list) {
   all_dat_small <- g_model_small@frame
   
   # K-fold CV for small plants ------------------------------ # 
-  set.seed(1)
-  folds <- caret::groupKFold(group = all_dat_small$year, 9)  
-  folds <- lapply( folds, function( x ) { as.numeric( rownames(all_dat_small[-x, ])) }) # invert folds to match function above
+  years <- unique( all_dat_small$year )
+  folds <- lapply( years , function( y ) { return( which(all_dat_small$year == y ))})
   
   small_plant_null_cv <- cross_validate_growth(model = g_model_small_null, data = all_dat_small, folds = folds)
   small_plant_null_cv$mtype <- "null"
@@ -82,14 +81,13 @@ for( sp in species_list) {
   
 }
 
-out 
 cv_out <- do.call( rbind, out ) 
 
 cv_out %>% 
   mutate( Treatment = 'Control', Period = 'Historical') %>% 
   pivot_longer(cols = R2:BIC) %>% unite( col = 'stat', c(name, mtype)) %>% 
   pivot_wider(names_from = stat, values_from = value) %>% 
-  write_csv('output/growth_models/in_sample_cv_growth_models.csv')
+  write_csv('output/growth_models/cross_validation_growth_models.csv')
 
 # Out of sample validation 
 out <- list( list()  , list(), list() , list() )

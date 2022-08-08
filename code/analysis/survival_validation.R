@@ -42,14 +42,18 @@ for( sp in species_list) {
     group_by( mtype, species, unit ) %>% 
     summarise( AUC = mean(AUC, na.rm = T), RMSE = mean(RMSE) )  
   
-  out[[sp]]$AIC <- NA
+  out[[sp]]$AICc <- NA
   out[[sp]]$BIC <- NA
+  out[[sp]]$DIC <- NA
   
-  out[[sp]]$AIC[ out[[sp]]$mtype == 'clim' ] <- AIC( s_model )
-  out[[sp]]$AIC[ out[[sp]]$mtype == 'null' ] <- AIC( s_model_null )
+  out[[sp]]$AICc[ out[[sp]]$mtype == 'clim' ] <- MuMIn::AICc(  s_model )
+  out[[sp]]$AICc[ out[[sp]]$mtype == 'null' ] <- MuMIn::AICc( s_model_null )
   
   out[[sp]]$BIC[ out[[sp]]$mtype == 'clim' ] <- BIC( s_model )
   out[[sp]]$BIC[ out[[sp]]$mtype == 'null' ] <- BIC( s_model_null )
+
+  out[[sp]]$DIC[ out[[sp]]$mtype == 'clim' ] <- MuMIn::DIC( s_model )
+  out[[sp]]$DIC[ out[[sp]]$mtype == 'null' ] <- MuMIn::DIC( s_model_null )
   
 }
 cv_out <- do.call( rbind, out ) 
@@ -58,11 +62,12 @@ cv_out %>%
   mutate( Treatment = 'Control', Period = 'Historical') %>% 
   pivot_longer(cols = AUC:BIC) %>% unite( col = 'stat', c(name, mtype)) %>% 
   pivot_wider(names_from = stat, values_from = value) %>% 
-  write_csv('output/cross_validation_survival_performance.csv')
+  write_csv('output/survival_models/cross_validation_survival_models.csv')
 
 # Out of sample validation 
 out <- list( list()  , list(), list() , list() )
 names( out ) <- species_list
+sp <- "POSE"
 for( sp in species_list) { 
   
   s_model <- read_rds( s_model_files[str_detect(s_model_files, sp)])
@@ -98,19 +103,19 @@ for( sp in species_list) {
     )
   
   oos_stats$species <- sp 
-  oos_stats$unit <- 'log_size'
+  oos_stats$unit <- 'survival'
   
   out[[sp]] <- oos_stats 
-  
+
 }
 oos_performance <- do.call(bind_rows, out)
 
 oos_performance %>% 
   mutate( Period = 'Experimental') %>% 
-  write_csv('output/oos_growth_performance.csv')
+  write_csv('output/survival_models/oos_survival_validation.csv')
 
 
-
+read_csv('output/survival_models/oos_survival_validation.csv')
 
 
 
