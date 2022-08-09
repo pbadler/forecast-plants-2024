@@ -1,2 +1,7 @@
-*
+*.csv
+*.Rdata
+!*testing_data.csv
+!*training_data.csv
+!*ClimWin_Survival_data.csv
+!*ClimWin_Growth_data.csv
 !.gitignore

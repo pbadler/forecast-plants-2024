@@ -33,7 +33,7 @@ prep_growth_for_climWin <- function( species, last_year, quad_info, size_cutoff 
   my_dat <- 
     dat %>% 
     dplyr::select(quad, pid, age, year, area, starts_with('W.'))  %>% 
-    mutate( W.intra = eval(parse(text = intra)))
+    mutate( W.intra = eval(parse(text = intra))) 
   
   growth <- my_dat %>% 
     left_join(quad_info, by = 'quad') %>% 
@@ -41,6 +41,7 @@ prep_growth_for_climWin <- function( species, last_year, quad_info, size_cutoff 
     arrange(pid, year) %>% 
     mutate(area = log(area))  %>% 
     mutate( area0 = lag(area)) %>% 
+    mutate_at( .vars = vars( starts_with('W.')), .funs = 'lag') %>%  # competitors are for current year
     arrange( pid, year ) %>% 
     filter(!is.na( area ), !is.na(area0))  %>% 
     filter( area0 > size_cutoff ) %>% 
@@ -50,8 +51,6 @@ prep_growth_for_climWin <- function( species, last_year, quad_info, size_cutoff 
   return( growth )
 }
 
-
-
 prep_survival_for_climWin <- function( species, last_year, quad_info){ 
   
   intra <- paste0( 'W.' , species )
@@ -60,7 +59,6 @@ prep_survival_for_climWin <- function( species, last_year, quad_info){
     mutate( pid = paste( quad, trackID, sep = "_"))
   
   dat <- dat %>% 
-    mutate( year = year + 1) %>% # Add one year so that the survival "response" coincides with the current year, not the future
     filter( year < last_year )  
   
   mnyear <- min(dat$year)
@@ -80,10 +78,19 @@ prep_survival_for_climWin <- function( species, last_year, quad_info){
     filter( !is.na(area0), 
             !is.na(survives),
             is.finite(area0), 
-            year > 1925) %>%
+            year > 1926) %>%
     mutate( date_reformat = paste0( '15/06/', year)) %>% 
     left_join(quad_info, by = 'quad') %>% 
-    mutate( climate = 1 )
+    mutate( climate = 1 ) %>% 
+    ungroup() 
+  
+  # Survival covariates are for current year, 
+  # But survival response is for the following year 
+  # add 1 to year to match climate chronology
+  
+  survival <-
+    survival %>%
+    mutate( year = year + 1 )
   
   return( survival )
 }
@@ -231,7 +238,7 @@ getBestWindows <- function( combos ){
   return( window)
 }
 
-makeWindowTable <- function( WindowResult, species_name, type_name ) { 
+makeWindowTable <- function( WindowResult, species_name, type_name  ) { 
   
   getBestWindows(WindowResult[[1]]$combos) %>% 
     mutate( fit = 1 ) %>% 
@@ -366,30 +373,37 @@ cross_validate_survival <- function ( model, data, folds ){
   
 }
 
-plot_small_plant_windows <- function(growth_windows, sp ) { 
+
+plot_windows_no_intxn <- function(window_df, sp) { 
   
-  temp_windows <- growth_windows %>% 
-    filter( species == sp) 
+  temp_windows <- 
+    window_df %>% 
+    filter( species == sp) %>% 
+    filter( str_detect(type, "no_intxn") | str_detect( type, 'small'))
+  
   temp_par <- temp_windows[1, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
   
   # load results file for the current species
-  load(file = paste0( 'output/growth_models/', sp,  '_small_plant_', temp_par$type[1], '_mer_monthly_ClimWin.rda'))
+  if( str_detect( temp_par$type[1] , 'growth' )){ 
+    load(file = paste0( 'output/growth_models/', sp,  '_', temp_par$type[1], '_mer_monthly_ClimWin.rda'))
+    
+  }else if( str_detect( temp_par$type[1], 'survival')){ 
+    load(file = paste0( 'output/survival_models/', sp,  '_', temp_par$type[1], '_mer_monthly_ClimWin.rda'))
+  }
+  
   temp_obj <- ls()[str_detect( ls(), sp) & str_detect(ls(), temp_par$type[1])]  
   results <- eval(parse(text = temp_obj))  
+  
   
   # First climate variable ----------------# 
   fit1 <- my_delta_plot(results, temp_par)
   beta1 <- my_beta_plot(results, temp_par)
-  
-  #var2_title <- paste0( temp_par$climate, ' (', temp_par$WindowOpen, ' - ' , temp_par$WindowClose, ' mos. back)')
-  
+  # second climate var ------------------- #
   temp_par <- temp_windows[2, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
   fit2 <- my_delta_plot(results, temp_par)
-  
   beta2 <- my_beta_plot(results, temp_par)
   
-  temp_title <- paste0( temp_par[, c('species', 'type')], collapse = ' small plant ')
-  
+  temp_title <- paste0( temp_par[, c('species', 'type')], collapse = ' ')
   
   png(filename = paste0('figures/', str_squish(temp_title), "_window_plots.png"),
       width = 7,
@@ -397,12 +411,7 @@ plot_small_plant_windows <- function(growth_windows, sp ) {
       units = 'in',
       res = 300)
   
-  grid.arrange(fit1, fit2, beta1, beta2, nrow = 2, 
+  grid.arrange(fit1, fit2, beta1, beta2,
                top = text_grob(temp_title, size = 12))
-  
   dev.off() 
-  
 }
-
-
-

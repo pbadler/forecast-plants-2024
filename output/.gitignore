@@ -1,2 +1,4 @@
 *
+!./growth_models/*.csv
+!./survival_models/*.csv
 !.gitignore

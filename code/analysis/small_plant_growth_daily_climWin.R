@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything earlier is used 
-sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -33,7 +33,7 @@ window_exclude_dur <- 1
 window_exclude_max <- 5
 
 size_cutoff <- -1 # do small plants
-species <- 'POSE' # for testing 
+species <- 'ARTR' # for testing 
 
 # Climate and VWC data  ------------------- # 
 quad_info <- read_csv( file = 'data/quad_info.csv')
@@ -65,11 +65,8 @@ for(species in sp_list){
                       REML = F,
                       control = control_lmer)
   model_type <- "mer"
-  # m_baseline <- lm( area ~ area0*climate + W.intra, data = growth)
-  # model_type <- "lm"
-  # 
-  #write_csv( growth, paste0( 'data/temp/', species, '_ClimWin_Growth_data.csv'))
-  write_rds( m_baseline, paste0( 'output/growth_models/', species, '_small_plant_growth_baseline_', model_type, '.rds'))
+  
+  write_rds( m_baseline, paste0( 'output/growth_models/', species, '_growth_small_', model_type, '_baseline.rds'))
   
   growthWin <- slidingwin(xvar = list(TMAX_scaled = daily_weather$TMAX_scaled, 
                                       TAVG_scaled = daily_weather$TAVG_scaled,
@@ -103,7 +100,7 @@ for(species in sp_list){
                            stat = 'mean', 
                            func = c('lin'))
   
-  out_obj_name <- paste(species, '_small_plant_growth', 'monthly_ClimWin', sep = '_')
+  out_obj_name <- paste(species, 'growth_small', 'monthly_ClimWin', sep = '_')
   
   out <- list( growthWin, growthWin2 )
   names(out ) <- c('ClimWinFit1', 'ClimWinFit2')
@@ -113,8 +110,7 @@ for(species in sp_list){
     out
   )
   
-  
   save(list = out_obj_name, 
-       file = paste0( "output/growth_models/", species, "_small_plant_growth_", model_type, "_monthly_ClimWin.rda"))
+       file = paste0( "output/growth_models/", species, "_growth_small_", model_type, "_monthly_ClimWin.rda"))
   
 }
