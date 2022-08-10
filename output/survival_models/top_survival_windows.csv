@@ -3,3 +3,15 @@ survives,VWC_scaled,survival,mean,lin,-47.82,12,10,1,1,ARTR
 survives,TAVG_scaled,survival,mean,lin,-17.51,20,19,2,2,ARTR
 survives,TAVG_scaled,survival_no_intxn,mean,lin,-7.89,24,19,3,1,ARTR
 survives,VWC_scaled,survival_no_intxn,mean,lin,-2.86,14,1,1,2,ARTR
+survives,TMAX_scaled,survival,mean,lin,-12.05,22,22,2,1,HECO
+survives,VWC_scaled,survival,mean,lin,-2.26,9,9,1,2,HECO
+survives,TMAX_scaled,survival_no_intxn,mean,lin,-12.49,23,22,2,1,HECO
+survives,VWC_scaled,survival_no_intxn,mean,lin,-4.75,2,2,1,2,HECO
+survives,TMIN_scaled,survival,mean,lin,-8.46,11,11,4,1,POSE
+survives,VWC_scaled,survival,mean,lin,-4.09,2,1,1,2,POSE
+survives,TMIN_scaled,survival_no_intxn,mean,lin,-9.74,3,3,4,1,POSE
+survives,VWC_scaled,survival_no_intxn,mean,lin,-1.36,11,9,1,2,POSE
+survives,TMAX_scaled,survival,mean,lin,-47.77,10,8,2,1,PSSP
+survives,VWC_scaled,survival,mean,lin,-16.89,14,8,1,2,PSSP
+survives,TMAX_scaled,survival_no_intxn,mean,lin,-8.31,23,22,2,1,PSSP
+survives,VWC_scaled,survival_no_intxn,mean,lin,-3.77,2,1,1,2,PSSP
