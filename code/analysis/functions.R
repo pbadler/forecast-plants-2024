@@ -97,7 +97,10 @@ prep_survival_for_climWin <- function( species, last_year, quad_info){
 
 addVars <- function( climWin , data1 , responseVar = 'survives'){ 
   
-  bestModel <- climWin$combos %>% filter( DeltaAICc == min(DeltaAICc))
+  bestModel <- climWin$combos %>% 
+    filter( DeltaAICc == min(DeltaAICc) )  %>% 
+    filter( row_number() == 1 )
+  
   bestVar <- bestModel$climate %>% as.character()
   bestModelData <- climWin[[ which( climWin$combos$climate == bestVar )]]
   

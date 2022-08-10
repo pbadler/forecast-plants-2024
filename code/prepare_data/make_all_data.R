@@ -19,10 +19,9 @@ source('code/prepare_data/calc_treatment_effects_on_SOILWAT.R')
 # 2. Import and process the demographic data ------------
 source('code/prepare_data/get_all_demographic_data.R') # depends on access to driversdata 
 source('code/prepare_data/calculate_cover_per_plot.R') # depends on access to driversdata 
-source('code/prepare_data/growth/clean_size_data.R')
+#source('code/prepare_data/growth/clean_size_data.R')
 
 # source('code/prepare_data/prep_vital_rate_df.R')
 
 # 3. clean up temp files
-
-source('code/prepare_data/delete_temp_vital_rate_files.R')
+#source('code/prepare_data/delete_temp_vital_rate_files.R')

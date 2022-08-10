@@ -10,7 +10,7 @@ source('code/analysis/functions.R')
 last_year <- 2010 # last year of training data, everything earlier is used 
 
 # ClimWin Window Settings Monthly
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 window_open_max <- 24
 window_open_min <- 1
@@ -61,7 +61,8 @@ for(species in sp_list){
                               refday = c(15, 06),
                               stat = 'mean', 
                               func = c('lin'))
-
+  
+  # Refit with the best climate var in baseline 
   addVars_list <- addVars(survivesWin, survival)
   
   m_baseline <- update( m_baseline, paste0(  ". ~ . + area0*", addVars_list$bestVar), 

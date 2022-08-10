@@ -37,8 +37,8 @@ size <- size %>%
 
 model <- lmer( area ~ area0 + (1|year) , data = size )
 
-open <- 24
-close <- 24
+open <- 14
+close <- 4
 
 test <- singlewin(
   list( TMAX = daily_weather$TMAX) , 

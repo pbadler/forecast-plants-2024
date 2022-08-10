@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything earlier is used 
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24

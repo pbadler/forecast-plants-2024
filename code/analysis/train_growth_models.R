@@ -3,13 +3,24 @@ library(tidyverse)
 library(lubridate)
 source('code/analysis/functions.R')
 
+
+# For each species this script fits a: 
+#  1. Growth model with size x climate interaction. 
+#  2. Growth model without size x climate interaction 
+#  3. Null growth model without climate 
+#  4. Growth model for small plants 
+#  5. Null growth model for small plants 
+#  
+#  Finally it saves training and testing data for each model.
+# ----------------------------------------------------------  
+
 split_year <- 2010 # Training testing split year 
 size_cutoff <- -1  # log scale size cutoff between large and small 
 quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 growth_windows <- read_csv('output/growth_models/top_growth_windows.csv')
 
-species_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 sp <- 'ARTR'
 
 for( sp in species_list){ 
@@ -18,6 +29,7 @@ for( sp in species_list){
     growth_windows %>% 
     filter( species == sp, 
             type == 'growth')
+  
   
   first_var <- temp[ temp$fit == 1, c('climate', 'WindowOpen', 'WindowClose', 'index', 'fit')] 
   second_var <- temp[ temp$fit == 2, c('climate', 'WindowOpen', 'WindowClose', 'index', 'fit')]

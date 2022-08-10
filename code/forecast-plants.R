@@ -54,9 +54,11 @@ source('code/figure_scripts/plot_cover.R')
 # Use sliding windows from ClimWin package find best climate windows 
 # for growth and survival of each species. 
 source('code/analysis/prep_daily_weather.R')
+
+## Warning ## takes a while to run for all 4 species !!! 
 source('code/analysis/growth_daily_climWin.R')
 
-## WARNING ## !!!!!!!!!!!!!!!! TAKES MANY HOURS TO RUN !!!! 
+## WARNING ## takes hours to run for all 4 species (especially PSSP) !!!! 
 source('code/analysis/survival_daily_climWin.R') # !!!!!!!
 
 # plot  windows and save best windows to tables 
@@ -82,9 +84,10 @@ source('code/figure_scripts/plot_IBM_predictions.R') # a work in progress
 
 # 7. Evaluate vital rate predictions on the held-out validation data (2012 to 2016)
 
-source('code/analysis/model_validation.R')
+source('code/analysis/growth_validation.R')
+source('code/analysis/survival_validation.R')
 
-# 8. Evalute cover predictions from IBMs 
+# 8. Generate cover predictions from IBMs 
 
 
 # ----- Generate Figures ----------------------------------------- # 

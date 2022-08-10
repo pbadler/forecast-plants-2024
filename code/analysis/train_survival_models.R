@@ -1,6 +1,13 @@
 rm(list = ls() )
 library(tidyverse)
 source('code/analysis/functions.R')
+# For each species this script fits a: 
+#  1. Survival model with size x climate interaction. 
+#  2. Survival model without size x climate interaction 
+#  3. Null survival model without climate 
+#
+#  Finally it saves training and testing data for each model.
+# ----------------------------------------------------------  
 
 split_year <- 2010 # Training testing split year 
 size_cutoff <- -1  # log scale size cutoff between large and small 
@@ -8,7 +15,7 @@ quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 
 survival_windows <- read_csv('output/survival_models/top_survival_windows.csv')
-species_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 sp <- 'ARTR'
 for( sp in species_list){ 
@@ -143,13 +150,5 @@ for( sp in species_list){
   
   saveRDS(my_mod, paste0( "output/survival_models/", temp_name, ".rds"))
   
-  # Save null model 
-  frm_null <- as.formula( paste0( 'survives ~ area0 + ', W.intra,   ' + (1|year/Group)' ))
-  my_mod_null <- glmer( formula = frm_null, 
-                        data = training, 
-                        family = 'binomial', 
-                        control = glmerControl(optimizer = 'bobyqa'))
-  
-  saveRDS(my_mod_null, paste0( "output/survival_models/", temp_name, "_null.rds"))
   
 }

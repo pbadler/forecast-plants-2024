@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything earlier is used 
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -43,7 +43,6 @@ daily_weather <-
   filter( year <= last_year)
 
 ## ------------------------------------------------- 
-species <- 'ARTR'
 for(species in sp_list){ 
   # loop Species 
   # 1. Find best univariate climate model 
@@ -80,6 +79,7 @@ for(species in sp_list){
                                stat = 'mean', 
                                func = c('lin'))
   
+  # Refit with best variable added to baseline
   addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area')
   
   m_baseline <- update( m_baseline, paste0(  ". ~ . + area0*", addVars_list$bestVar), 
@@ -114,17 +114,10 @@ for(species in sp_list){
   
 }
 
-
 for(species in sp_list){ 
     
-  # for(species in sp_list){ 
-  # loop Species 
-  # 1. Find best univariate climate model 
-  # 2. Redo ClimWin model selection with additional variable
-  #     a. When best climate variable is temperature add VWC window 
-  #     b. When best climate variable is VWC add temperature window 
-  # 3. Save top model and data 
-  
+  # Fit models without climate x size interaction 
+
   growth <- prep_growth_for_climWin(species, last_year = last_year, quad_info = quad_info, size_cutoff = size_cutoff)
   
   m_baseline <- lmer( area ~ area0 + W.intra + (1|year/Group),
@@ -149,6 +142,7 @@ for(species in sp_list){
                           stat = 'mean', 
                           func = c('lin'))
   
+  # Refit with best variable added to baseline
   addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area')
   
   m_baseline <- update( m_baseline, paste0(  ". ~ . + ", addVars_list$bestVar), 
