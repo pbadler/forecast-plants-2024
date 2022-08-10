@@ -4,7 +4,11 @@ library(tidyverse)
 library(caret)
 source('code/analysis/functions.R')
 
-species_list <- c('ARTR')#, 'HECO', 'POSE', 'PSSP')
+# Leave one year out cross validation of all growth models
+# fit to historical data from 1926 - 2009 
+# excludes experimental data 
+
+species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 out <- list( list()  , list(), list() , list() )
 names( out ) <- species_list
 sp <- "ARTR"
@@ -102,7 +106,9 @@ cv_out <- do.call( rbind, out )
 cv_out %>% 
   mutate( Treatment = 'Control', Period = 'Historical') %>% 
   pivot_longer(cols = R2:BIC) %>% unite( col = 'stat', c(name, mtype)) %>% 
-  pivot_wider(names_from = stat, values_from = value) %>% 
+  arrange( species, unit, size_class, Treatment, Period, stat) %>% 
+  select( species, unit, size_class, Treatment, Period, stat, value ) %>% 
+  pivot_wider(names_from = stat, values_from = value)  %>% 
   write_csv('output/growth_models/cross_validation_growth_models.csv')
 
 
