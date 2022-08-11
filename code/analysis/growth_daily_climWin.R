@@ -58,6 +58,7 @@ for(species in sp_list){
                        data = growth,
                        REML = F,
                        control = control_lmer)
+  
   model_type <- "mer"
   # m_baseline <- lm( area ~ area0*climate + W.intra, data = growth)
   # model_type <- "lm"
@@ -79,6 +80,7 @@ for(species in sp_list){
                                stat = 'mean', 
                                func = c('lin'))
   
+
   # Refit with best variable added to baseline
   addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area')
   

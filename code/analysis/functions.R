@@ -418,3 +418,102 @@ plot_windows_no_intxn <- function(window_df, sp) {
                top = text_grob(temp_title, size = 12))
   dev.off() 
 }
+
+# Functions for generating cover predictions (IBM) -------- # 
+get_cover_prediction_data <- function( spp, type ) { 
+  
+  if( !is.null(type)){ 
+    gfiles <- dir('data/temp/', paste0( spp, '_growth'), full.names = T) 
+    gfiles <- gfiles[str_detect( gfiles, type )]
+    sfiles <- dir('data/temp/', paste0( spp, '_survival'), full.names = T) 
+    sfiles <- sfiles[str_detect( sfiles, type )]
+  }else{ 
+    gfiles <- dir('data/temp/', paste0( spp, '_growth_(training|testing)'), full.names = T) 
+    sfiles <- dir('data/temp/', paste0( spp, '_survival_(training|testing)'), full.names = T) 
+  }
+  
+  gsmallfiles <- dir('data/temp', paste0( spp, '_growth_small'), full.names = T)
+  
+  gdat <- lapply( gfiles, read_csv )
+  gdat_small <- lapply( gsmallfiles, read_csv)
+  sdat <- lapply( sfiles, read_csv )
+  
+  temp_data <- list( g1 = gdat[[1]], g2 = gdat[[2]], g_small1 = gdat_small[[1]], g_small2 = gdat_small[[2]], s1 = sdat[[1]], s2 = sdat[[2]] )
+}
+
+
+get_model_list <- function( spp, type ){ 
+  if( !is.null(type)){ 
+    gfile <- paste0('output/growth_models/', spp, '_growth_', type, '.rds')
+    sfile <- paste0('output/survival_models/', spp, '_survival_', type, '.rds') 
+  }else{ 
+    gfile <- paste0('output/growth_models/', spp, '_growth.rds') 
+    sfile <- paste0('output/survival_models/',  spp, '_survival.rds')
+  }
+  
+  if( is.null(type)  ) { 
+    gsmallfile <- paste0('output/growth_models/', spp, '_growth_small.rds')
+  }else if( type == 'null' ){ 
+    gsmallfile <- paste0('output/growth_models/', spp, '_growth_small_null.rds')
+  }else{ 
+    gsmallfile <- paste0('output/growth_models/', spp, '_growth_small.rds')
+  }
+  
+  return( lapply( list( g =  gfile, g_small = gsmallfile, s = sfile ), read_rds) )
+} 
+
+
+make_cover_predictions <- function( spp, models, temp_data, model_label , ... ) { 
+  
+  # Get the model specific climate covariates from the training and testing data 
+  s_dat <- temp_data$s1 %>% bind_rows(temp_data$s2)
+  g_dat <- temp_data$g1 %>% bind_rows(temp_data$g2)
+  g_dat_small <- temp_data$g_small1 %>% bind_rows(temp_data$g_small2 )
+  
+  g_dat_temp <- 
+    s_dat %>% 
+    select( quad, pid, year, area0, Treatment, Group, size_class, starts_with("W")) %>% 
+    filter( size_class == 'large') %>% 
+    left_join( g_dat %>% select(  year, Treatment, contains( c( 'TMAX', 'TMIN', 'TAVG', 'VWC'))) %>% distinct())
+  
+  g_dat_small_temp <- 
+    s_dat %>% 
+    select( quad, pid, year, area0, Treatment, Group, size_class, starts_with("W")) %>% 
+    filter( size_class == 'small') %>% 
+    left_join( g_dat_small %>% select(  year, Treatment, contains( c( 'TMAX', 'TMIN', 'TAVG', 'VWC'))) %>% distinct())
+  
+  
+  g_dat_temp$yhat <- predict( models$g, newdat = g_dat_temp, allow.new.levels = T, ...  )
+  g_dat_small_temp$yhat <- predict( models$g_small, newdat = g_dat_small_temp, allow.new.levels = T, ... )
+  s_dat$ps <- predict( models$s, newdat = s_dat, allow.new.levels = T, type = 'response', ... )
+  
+  size_predictions <- 
+    g_dat_temp %>% 
+    select(size_class, Group, Treatment, quad, pid, year, yhat ) %>% 
+    bind_rows( g_dat_small_temp %>% select( size_class, Group, Treatment, quad, pid, year, yhat ) )  %>% 
+    mutate( pred_size = exp( yhat))
+  
+  survival_predictions <- 
+    s_dat %>% 
+    select( area0, size_class, Group, Treatment, quad, pid, year, ps ) %>% 
+    group_by( size_class, quad, pid, Group, Treatment ) %>%
+    arrange( size_class, Group, Treatment, quad, pid, year ) %>% 
+    mutate( obs_size = exp( lead(area0) )) 
+  
+  return( 
+    survival_predictions %>% 
+      left_join(size_predictions ) %>% 
+      group_by( Group, Treatment, quad, year ) %>% 
+      summarise( !!paste0("predicted_", model_label):=100*sum(pred_size*ps, na.rm = T)/10e3 )
+  ) 
+} 
+
+
+
+
+
+
+
+
+
+
