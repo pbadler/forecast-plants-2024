@@ -1,5 +1,6 @@
 *.csv
 *.Rdata
+!*cover_predictions.csv
 !*testing_data.csv
 !*training_data.csv
 !*ClimWin_Survival_data.csv

@@ -1,4 +1,5 @@
-*
+*.csv
+!*_cover_validation.csv
 !./growth_models/*.csv
 !./survival_models/*.csv
 !.gitignore

@@ -68,15 +68,15 @@ for( sp in species_list){
     filter( Treatment %in% c('Control', 'Drought', 'Irrigation')) %>% 
     ungroup() %>%
     left_join(temp_clim, by = c('year', 'Treatment')) %>% 
-    mutate( Split = ifelse( year < split_year, 'Training', 'Testing')) %>% 
+    mutate( Split = ifelse( year <= split_year, 'Training', 'Testing')) %>% 
     split( .$Split)
   # ---------------------------------------------
   
   temp_name <- paste0( sp, '_growth')
   
   # Save Training and Testing data 
-  stopifnot( max( temp_dat$Training$year ) < 2011 )
-  stopifnot( min( temp_dat$Testing$year ) > 2009 )
+  stopifnot( max( temp_dat$Training$year ) <= split_year )
+  stopifnot( min( temp_dat$Testing$year ) > split_year )
   
   write_csv( temp_dat$Training, paste0( 'data/temp/', temp_name, '_training_data.csv'))
   write_csv( temp_dat$Testing, paste0( 'data/temp/', temp_name, '_testing_data.csv'))
