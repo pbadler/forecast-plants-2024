@@ -68,27 +68,23 @@ source('code/analysis/plot_window_comparisons.R')
 source('code/analysis/train_growth_models.R')
 source('code/analysis/train_survival_models.R')
 
-# Validate model performance 
-source('code/analysis/growth_validation.R')
-source('code/analysis/survival_validation.R')
+#  In sample model cross validation 
+source('code/analysis/growth_cross_validation.R')
+source('code/analysis/survival_cross_validation.R')
 
+# ------------- Out of sample Validation ------------------- # 
+#### !!! This is model out of sample (OOS) validation using 
+#### contemporary experimental data. Up to this point experimental data 
+#### should not have been consulted for model fitting or evaluation. 
+source('code/analysis/growth_oos_validation.R')
+source('code/analysis/survival_oos_validation.R')
 
 # ------ Simulation ---------------------------------------------  #
-
-# 6. Generate IBM predictions based on top demographic models 
-
-source('code/analysis/IBM_simulation.R')
-source('code/figure_scripts/plot_IBM_predictions.R') # a work in progress
+# Generate IBM predictions based on top demographic models 
+source( 'code/analysis/generate_cover_predictions.R') 
 
 # ----- Validation ----------------------------------------------- # 
-
-# 7. Evaluate vital rate predictions on the held-out validation data (2012 to 2016)
-
-source('code/analysis/growth_validation.R')
-source('code/analysis/survival_validation.R')
-
-# 8. Generate cover predictions from IBMs 
-
+source( 'code/analysis/cover_model_oos_validation.R')
 
 # ----- Generate Figures ----------------------------------------- # 
 
@@ -96,6 +92,4 @@ source('code/analysis/survival_validation.R')
 
 # ----- Generate Tables  ----------------------------------------- # 
 
-
-# ----- Knit manuscript  ------------------------------------------#
 
