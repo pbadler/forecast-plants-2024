@@ -13,10 +13,17 @@ source('code/prepare_data/merge_decagon_with_climate_station_data.R')
 source('code/prepare_data/soilMoistureTreatmentEffects.R')
 source('code/prepare_data/calc_treatment_effects_on_SOILWAT.R')
 # source('code/prepare_data/aggregate_VWC_data.R')
-# source('code/prepare_data/make_climate_variables.R') 
+
+source('code/prepare_data/make_climate_variables.R') 
 # source('code/prepare_data/prepare_climate_covariates.R')
 
 # 2. Import and process the demographic data ------------
+
+# To get the DriversData submodule: 
+# In shell run: 
+# git submodule init 
+# git submodule update 
+
 source('code/prepare_data/get_all_demographic_data.R') # depends on access to driversdata 
 source('code/prepare_data/calculate_cover_per_plot.R') # depends on access to driversdata 
 #source('code/prepare_data/growth/clean_size_data.R')
