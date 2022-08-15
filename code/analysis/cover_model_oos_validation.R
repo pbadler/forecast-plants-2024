@@ -23,7 +23,18 @@ for ( sp in spList ) {
     summarise( RMSE = caret::RMSE(value , observed, na.rm = T), 
                MAE = caret::MAE(value, observed, na.rm = T), 
                R2 = caret::R2( value, observed, na.rm = T))  %>% 
-    mutate( species = sp ) %>% 
+    rbind( cover %>%
+             mutate( Period = factor(ifelse(year > split_year, 'Testing', 'Training' ))) %>%  
+             filter( Period == 'Training') %>% 
+             pivot_longer( c(predicted_clim, predicted_no_intxn, predicted_null) ) %>% 
+             filter( !( Treatment != 'Control' & Period == 'Training')) %>% 
+             mutate( Treatment = 'Overall') %>% 
+             group_by( Period, Treatment, name ) %>%
+             summarise( RMSE = caret::RMSE(value , observed, na.rm = T), 
+                        MAE = caret::MAE(value, observed, na.rm = T), 
+                        R2 = caret::R2( value, observed, na.rm = T)) 
+    ) %>% 
+    mutate( species = sp )  %>% 
     write_csv( paste0 ( 'output/', sp, '_cover_validation.csv'))
 }
 
