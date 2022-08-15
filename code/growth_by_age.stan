@@ -1,9 +1,0 @@
-functions{ 
-}
-data{ 
-}
-parameters{
-
-}
-model{ 
-}
