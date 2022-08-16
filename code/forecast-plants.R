@@ -40,11 +40,11 @@ source('code/figure_scripts/plot_soilwat_to_ambient_comparison.R')
 # 3. Shelter temperature plot 
 source('code/figure_scripts/test_for_shelter_temperature_effects.R')
 
-# 4. Soil moisture aggregated by season 
-source('code/figure_scripts/plot_seasonal_soil_moisture.R')
+# 4. Soil moisture aggregated by season (not used)
+# source('code/figure_scripts/plot_seasonal_soil_moisture.R')
 
-# 5. Temperature aggregated by season (not used)
-# source('code/figure_scripts/plot_longterm_TAVG.R')
+# 5. Temperature aggregated by season 
+source('code/figure_scripts/plot_longterm_TAVG.R')
 
 # 2. Cover trends
 
