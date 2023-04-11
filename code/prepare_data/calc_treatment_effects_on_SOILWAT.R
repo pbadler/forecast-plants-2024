@@ -32,7 +32,7 @@ sw_avg <-
 rain_data <- 
   rain_data %>%
   ungroup() %>% 
-  select( date, inv_days_since_rain) 
+  dplyr::select( date, inv_days_since_rain) 
 
 pred_df <- 
   rain_data %>% 

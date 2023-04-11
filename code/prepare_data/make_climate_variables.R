@@ -56,7 +56,7 @@ monthly <-
   left_join(season, 
             by = c('MONTH' = 'month')) %>% 
   mutate( water_year = YEAR + lag_year ) %>% 
-  select(YEAR, MONTH, season, precip_seasons, water_year, PRCP, TAVG)
+  dplyr::select(YEAR, MONTH, season, precip_seasons, water_year, PRCP, TAVG)
 
 # annual climate  -------------------------------------------------#
 

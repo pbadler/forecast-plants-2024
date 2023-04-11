@@ -8,23 +8,29 @@ rm(list = ls() )
 # library(sheepweather) # in-house package for weather data!!! 
 # see https://github.com/akleinhesselink/sheepweather
 
-# library(tidyverse)
-# library(sheepweather)
-# library(lubridate)
-# library(zoo)
-# library(texreg)
-# library(xtable)
-# library(gridExtra)
-# library(MASS)
-# library(emmeans)
-# library(lme4)
-# library(egg)
-# library( optimx )
+library(tidyverse)
+library(sheepweather)
+library(lubridate)
+library(zoo)
+library(texreg)
+library(xtable)
+library(gridExtra)
+library(MASS)
+library(emmeans)
+library(lme4)
+library(egg)
+library(optimx)
+library(lmerTest)
+library(pbkrtest)
+library(climwin)
+library(imputeTS)
+library(dfoptim)
 
 # run data preparation files first --------------------------- # 
-source('code/figure_scripts/save_plot_theme.R')
 
-source('code/prepare_data/make_all_data.R') # takes a minute or two 
+# comment these out after running once
+# source('code/figure_scripts/save_plot_theme.R')
+# source('code/prepare_data/make_all_data.R') # takes a minute or two 
 
 # Some treatment figures  ------------------------------------------ # 
 
@@ -44,10 +50,11 @@ source('code/figure_scripts/test_for_shelter_temperature_effects.R')
 # source('code/figure_scripts/plot_seasonal_soil_moisture.R')
 
 # 5. Temperature aggregated by season 
+# AK: Warning: Ignoring unknown aesthetics: x (?)
 source('code/figure_scripts/plot_longterm_TAVG.R')
 
 # 2. Cover trends
-
+#AK: missing values ok?
 source('code/figure_scripts/plot_cover.R')
 
 # ----- Model Fitting/Selection ---------------------------------- # 

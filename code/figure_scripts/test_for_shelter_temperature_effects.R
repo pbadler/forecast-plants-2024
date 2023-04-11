@@ -51,7 +51,7 @@ daily_anoms <-
   left_join(
     bind_rows(
       daily_air %>% rename('value' = decagon) %>% mutate(type = 'decagon'),
-      usses_ibutton %>% rename( 'value' = ibutton)  %>% mutate( type = 'ibutton') %>% select(-n) ),
+      usses_ibutton %>% rename( 'value' = ibutton)  %>% mutate( type = 'ibutton') %>% dplyr::select(-n) ),
     by = c('date', 'stat')) %>%
   filter( !is.na(plot)) %>%
   mutate( anom = value - station ) %>%
@@ -59,7 +59,7 @@ daily_anoms <-
   mutate( month = month(date), year = year(date)) %>%
   left_join(quads, by = c('plot' = 'QuadName')) %>%
   left_join(seasons, by = 'month') %>%
-  select( month, plot, Treatment, type, year, season, date, anom, PrecipGroup)
+  dplyr::select( month, plot, Treatment, type, year, season, date, anom, PrecipGroup)
 
 
 

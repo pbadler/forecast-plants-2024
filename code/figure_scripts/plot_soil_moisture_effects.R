@@ -25,7 +25,7 @@ rain_data <-
   weather %>%
   ungroup() %>% 
   filter(date > '2012-01-01', date < '2017-01-01') %>% 
-  select( date, inv_days_since_rain) 
+  dplyr::select( date, inv_days_since_rain) 
   
 pred_df <- 
   rain_data %>% 
@@ -36,7 +36,7 @@ pred_df <-
               mutate( Treatment = 'Drought')) %>% 
   left_join(daily_avg_sm, by = c('date', 'Treatment')) %>% 
   mutate(month = month(date)) %>% 
-  left_join(seasons %>% select(month, season), by = 'month') %>% 
+  left_join(seasons %>% dplyr::select(month, season), by = 'month') %>% 
   data.frame()
 
 pred_df$pred <- predict(sm_model, newdata = pred_df, re.form = NA )
@@ -44,12 +44,12 @@ pred_df$pred <- predict(sm_model, newdata = pred_df, re.form = NA )
 ambient_sm <- 
   pred_df %>% 
   filter( Treatment == 'Control') %>% 
-  select( date, raw)   %>% 
+  dplyr::select( date, raw)   %>% 
   distinct()
 
 predicted_soil_moisture <- 
   pred_df %>% 
-  select( date, Treatment, season, obs, pred) %>% 
+  dplyr::select( date, Treatment, season, obs, pred) %>% 
   arrange( date) %>% 
   gather(type, value, c('obs', 'pred')) %>%  
   left_join(ambient_sm, by = 'date') %>% 

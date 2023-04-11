@@ -26,7 +26,7 @@ weather <-
 weather <-
   weather %>%
   mutate( TMEAN = ( TMAX + TMIN ) / 2 ) %>%
-  select(date, PRCP, TMEAN) %>%
+  dplyr::select(date, PRCP, TMEAN) %>%
   mutate( rainfall = rollapply(PRCP, 2, sum, fill = 0, na.rm = TRUE, align = 'right') ) %>%
   mutate( rainfall = ifelse( rainfall > 0.0 & TMEAN > 3 & !is.na(rainfall), 'rainy', 'not rainy')) %>%
   mutate( rainfall = ifelse( is.na(rainfall), 'not rainy', rainfall))
