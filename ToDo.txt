@@ -1,0 +1,20 @@
+4/18/2023
+
+1. Finish running all code. Model objects (.RDS files) currently not saved in output folder,
+I will need those to make figures showing climate coefficients. 
+
+2. For Andy: size class only for growth? Survival used all sizes in one model?
+
+3. Figures to make
+
+-add info on historical soil moisture to soil moisture plots
+
+-add info on significant treatment effects to cover trend plots
+
+-plot model coefficients
+
+-plot model CV results
+
+-plot OOS validation results for vital rates x treatment
+
+-plot OOS validation results for cover x treatment (include training data?)
