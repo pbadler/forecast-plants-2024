@@ -4,6 +4,13 @@
 I will need those to make figures showing climate coefficients. 
 
 2. For Andy: size class only for growth? Survival used all sizes in one model?
+More questions for Andy: 
+
+Where is the recruitment model fit? I don't see code for it, and
+there is no model object in output/recruitment. Or are we simply ignoring recruitment
+completely, since we are doing 1 step ahead predictions of cover? If so, we should get
+all the recruitment stuff out of the project.
+
 
 3. Figures to make
 
