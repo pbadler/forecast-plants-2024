@@ -19,6 +19,7 @@ for( sp in species_list) {
   all_dat_no_intxn <- read_csv(paste0( 'data/temp/', sp, '_growth_no_intxn_training_data.csv'))
   all_dat_small <- read_csv(paste0( 'data/temp/', sp, '_growth_small_training_data.csv') ) 
   
+  
   stopifnot( all( all_dat$pid == all_dat_no_intxn$pid) & all( all_dat$year == all_dat_no_intxn$year) ) # check that training data are for the same plants  
   
   g_model <- read_rds(paste0( 'output/growth_models/', sp, '_growth.rds'))

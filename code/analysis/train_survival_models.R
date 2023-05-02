@@ -58,7 +58,7 @@ for( sp in species_list){
     surv %>% 
     filter( Treatment %in% c('Control', 'Drought', 'Irrigation')) %>% 
     left_join(temp_clim, by = c('year', 'Treatment')) %>% 
-    mutate( Split = ifelse( year < split_year, 'Training', 'Testing')) %>% 
+    mutate( Split = ifelse( year <= split_year, 'Training', 'Testing')) %>% 
     split( .$Split)
   
   training <- 

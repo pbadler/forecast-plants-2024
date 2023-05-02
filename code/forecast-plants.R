@@ -86,11 +86,10 @@ source('code/analysis/survival_cross_validation.R')
 source('code/analysis/growth_oos_validation.R')
 source('code/analysis/survival_oos_validation.R')
 
-# ------ Simulation ---------------------------------------------  #
-# Generate IBM predictions based on top demographic models 
+# Generate cover predictions based on top demographic models 
 source( 'code/analysis/generate_cover_predictions.R') 
 
-# ----- Validation ----------------------------------------------- # 
+# validate cover predictions
 source( 'code/analysis/cover_model_oos_validation.R')
 
 # ----- Generate Figures ----------------------------------------- # 

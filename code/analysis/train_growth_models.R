@@ -137,7 +137,7 @@ for( sp in species_list){
     filter( Treatment %in% c('Control', 'Drought', 'Irrigation')) %>% 
     ungroup() %>%
     left_join(temp_clim, by = c('year', 'Treatment')) %>% 
-    mutate( Split = ifelse( year < split_year, 'Training', 'Testing')) %>% 
+    mutate( Split = ifelse( year <= split_year, 'Training', 'Testing')) %>% 
     split( .$Split)  
   
   temp_name <- paste0( sp, '_growth_no_intxn')
@@ -192,7 +192,7 @@ for( sp in species_list){
     filter( Treatment %in% c('Control', 'Drought', 'Irrigation')) %>% 
     ungroup() %>%
     left_join(temp_clim, by = c('year', 'Treatment')) %>% 
-    mutate( Split = ifelse( year < split_year, 'Training', 'Testing')) %>% 
+    mutate( Split = ifelse( year <= split_year, 'Training', 'Testing')) %>% 
     split( .$Split)  
   
   temp_name <- paste0( sp, '_growth_small')
