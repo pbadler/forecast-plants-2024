@@ -74,7 +74,6 @@ source('code/analysis/plot_window_comparisons.R')
 # Refit models with chosen climate windows and save to output folder 
 source('code/analysis/train_growth_models.R')
 source('code/analysis/train_survival_models.R')
-# AK: NO RECRUITMENT MODEL???
 
 #  In sample model cross validation 
 source('code/analysis/growth_cross_validation.R')
