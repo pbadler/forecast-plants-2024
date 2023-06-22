@@ -4,7 +4,7 @@ library(tidyverse)
 library(caret)
 source('code/analysis/functions.R')
 
-species_list <- c('ARTR')#, 'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 out <- list( list()  , list(), list() , list() )
 names( out ) <- species_list
 sp <- "ARTR"
