@@ -4,7 +4,7 @@ cv_dat <- read.csv("output/growth_models/cross_validation_growth_models.csv",hea
 oos_dat <- read.csv("output/growth_models/oos_growth_validation.csv",header=T)
 
 #choose error metric and filter cross-validation data
-my_err <- "MAE"
+my_err <- "RMSE"
 tmp <- grep(my_err,names(cv_dat))
 cv_dat <- cv_dat[,c(1:5,tmp)]
 cv_dat <- cv_dat[,c(1:5,8,7,6)]
@@ -37,7 +37,7 @@ for(iSpp in 1:length(sppList)){
   if(iSpp==1) legend("topleft",c("Training","Testing"),fill=mycols,bty="n")
   mtext(doSpp,side=3,line=1,adj=0)
 }
-mtext("Mean Absolute Error",side=2,line=1, outer=T)
+mtext("RMSE",side=2,line=1, outer=T)
 
 
 dev.off()
@@ -60,7 +60,7 @@ for(iSpp in 1:length(sppList)){
   if(iSpp==1) legend("topleft",c("Null","Climate","Clim x Size"),fill=mycols,bty="n")
   mtext(doSpp,side=3,line=1,adj=0)
 }
-mtext("Mean Absolute Error",side=2,line=1, outer=T)
+mtext("RMSE",side=2,line=1, outer=T)
 
 dev.off()
 
@@ -68,5 +68,5 @@ dev.off()
 # barplots for cross validation error (all species together)
 mycols=c("white","grey","black")
 barplot(as.matrix(t(cv_dat_large[1:4,6:8])),beside=T,names.arg=c(cv_dat_large$species),
-        ylab="Mean absolute error",col=mycols)
+        ylab="RMSE",col=mycols)
 legend("topleft",c("Null","Climate","ClimxSize"),fill=mycols,bty="n")
