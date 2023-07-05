@@ -19,7 +19,7 @@ prep_growth_for_climWin <- function( species, last_year, quad_info, size_cutoff 
   
   intra <- paste0( 'W.' , species )
   dat <- read_csv( paste0 ( 'data/temp/', paste0( species, '_size.csv')))
-  dat <- dat[ dat$year < last_year, ]
+  dat <- dat[ dat$year <= last_year, ]
   mnyear <- min(dat$year)
   mxyear <- max(dat$year)
   pid <- unique( dat$pid )
@@ -59,7 +59,7 @@ prep_survival_for_climWin <- function( species, last_year, quad_info){
     mutate( pid = paste( quad, trackID, sep = "_"))
   
   dat <- dat %>% 
-    filter( year < last_year )  
+    filter( year <= last_year )  
   
   mnyear <- min(dat$year)
   mxyear <- max(dat$year)

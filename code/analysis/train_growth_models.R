@@ -20,7 +20,7 @@ quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 growth_windows <- read_csv('output/growth_models/top_growth_windows.csv')
 
-species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
 sp <- 'ARTR'
 
 for( sp in species_list){ 
@@ -49,11 +49,11 @@ for( sp in species_list){
     left_join(clim2, by = c('Treatment', 'year')) %>% 
     mutate( !!first_var$climate[1]:= as.numeric( scale(.data[[str_remove(first_var$climate[1], '_scaled')]] ))) %>% 
     mutate( !!second_var$climate[1]:=as.numeric( scale(.data[[str_remove(second_var$climate[1], '_scaled')]]))) %>% 
-    select( Treatment, year, 
-            .data[[str_remove( first_var$climate[1], '_scaled')]], 
-            .data[[str_remove( second_var$climate[1], '_scaled')]], 
-            .data[[first_var$climate[1]]], 
-            .data[[second_var$climate[1]]])
+    dplyr::select( Treatment, year, 
+            all_of(str_remove( first_var$climate[1], '_scaled')), 
+            all_of(str_remove( second_var$climate[1], '_scaled')), 
+            all_of(first_var$climate[1]), 
+            all_of(second_var$climate[1]))
   
   size <- prep_growth_for_climWin(species = sp, 
                                   last_year = 2020, # get all data 
@@ -91,6 +91,7 @@ for( sp in species_list){
   frm <- as.formula( paste0( 'area ~ area0*', first_var$climate[1], ' + area0*', second_var$climate[1], " + " , W.intra,   ' + (1|year/Group)' ))
   my_mod <- lmer( formula = frm, data = training_large, control = control_lmer, REML = T)
   model_name <- paste0( sp, '_growth')
+  
   saveRDS(my_mod, paste0( "output/growth_models/", model_name, ".rds"))
 
   # Null model  
@@ -123,11 +124,11 @@ for( sp in species_list){
     left_join(clim2, by = c('Treatment', 'year')) %>% 
     mutate( !!first_var$climate[1]:= as.numeric( scale(.data[[str_remove(first_var$climate[1], '_scaled')]] ))) %>% 
     mutate( !!second_var$climate[1]:=as.numeric( scale(.data[[str_remove(second_var$climate[1], '_scaled')]]))) %>% 
-    select( Treatment, year, 
-            .data[[str_remove( first_var$climate[1], '_scaled')]], 
-            .data[[str_remove( second_var$climate[1], '_scaled')]], 
-            .data[[first_var$climate[1]]], 
-            .data[[second_var$climate[1]]])
+    dplyr::select( Treatment, year, 
+                 all_of(str_remove( first_var$climate[1], '_scaled')), 
+                 all_of(str_remove( second_var$climate[1], '_scaled')), 
+                 all_of(first_var$climate[1]), 
+                 all_of(second_var$climate[1]))
   
   
   # split training and testing ------------- # 
@@ -178,11 +179,11 @@ for( sp in species_list){
     left_join(clim2, by = c('Treatment', 'year')) %>% 
     mutate( !!first_var$climate[1]:= as.numeric( scale(.data[[str_remove(first_var$climate[1], '_scaled')]] ))) %>% 
     mutate( !!second_var$climate[1]:=as.numeric( scale(.data[[str_remove(second_var$climate[1], '_scaled')]]))) %>% 
-    select( Treatment, year, 
-            .data[[str_remove( first_var$climate[1], '_scaled')]], 
-            .data[[str_remove( second_var$climate[1], '_scaled')]], 
-            .data[[first_var$climate[1]]], 
-            .data[[second_var$climate[1]]])
+    dplyr::select( Treatment, year, 
+                 all_of(str_remove( first_var$climate[1], '_scaled')), 
+                 all_of(str_remove( second_var$climate[1], '_scaled')), 
+                 all_of(first_var$climate[1]), 
+                 all_of(second_var$climate[1]))
   
   
   # split training and testing ------------- # 

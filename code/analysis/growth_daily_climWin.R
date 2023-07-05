@@ -23,8 +23,8 @@ control_lmer$optCtrl$iter.max <- 1e8
 source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
-last_year <- 2010 # last year of training data, everything earlier is used 
-sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+last_year <- 2010 # last year of training data, everything before and including this year is used 
+sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -33,7 +33,6 @@ window_exclude_dur <- 1
 window_exclude_max <- 5
 
 size_cutoff <- -1 # size division for big/small 
-species <- 'ARTR' # for testing 
 
 # Climate and VWC data  ------------------- # 
 quad_info <- read_csv( file = 'data/quad_info.csv')
@@ -110,7 +109,6 @@ for(species in sp_list){
     out
   )
   
-  
   save(list = out_obj_name, 
        file = paste0( "output/growth_models/", species, "_growth_", model_type, "_monthly_ClimWin.rda"))
   
@@ -123,7 +121,7 @@ for(species in sp_list){
   growth <- prep_growth_for_climWin(species, last_year = last_year, quad_info = quad_info, size_cutoff = size_cutoff)
   
   m_baseline <- lmer( area ~ area0 + W.intra + (1|year/Group),
-                      data = growth,
+                      data = growth2,
                       REML = F,
                       control = control_lmer)
   model_type <- "mer"
