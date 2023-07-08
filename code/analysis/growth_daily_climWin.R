@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything before and including this year is used 
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -121,7 +121,7 @@ for(species in sp_list){
   growth <- prep_growth_for_climWin(species, last_year = last_year, quad_info = quad_info, size_cutoff = size_cutoff)
   
   m_baseline <- lmer( area ~ area0 + W.intra + (1|year/Group),
-                      data = growth2,
+                      data = growth,
                       REML = F,
                       control = control_lmer)
   model_type <- "mer"

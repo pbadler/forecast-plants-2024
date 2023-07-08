@@ -10,7 +10,7 @@ source('code/analysis/functions.R')
 last_year <- 2010 # last year of training data, everything earlier is used 
 
 # ClimWin Window Settings Monthly
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 window_open_max <- 24
 window_open_min <- 1
