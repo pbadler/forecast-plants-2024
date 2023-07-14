@@ -65,10 +65,10 @@ for(species in sp_list){
   write_csv( growth, paste0( 'data/temp/', species, '_ClimWin_Growth_data.csv'))
   write_rds( m_baseline, paste0( 'output/growth_models/', species, '_growth_', model_type, '_baseline.rds'))
   
-  growthWin <- slidingwin(xvar = list(TMAX_scaled = daily_weather$TMAX_scaled, 
-                                           TAVG_scaled = daily_weather$TAVG_scaled,
-                                           TMIN_scaled = daily_weather$TMIN_scaled, 
-                                           VWC_scaled = daily_weather$VWC_scaled),
+  growthWin <- slidingwin(xvar = list(TMAX_scaled = daily_weather$TMAX_scaled), #, 
+                                           # TAVG_scaled = daily_weather$TAVG_scaled,
+                                           # TMIN_scaled = daily_weather$TMIN_scaled, 
+                                           # VWC_scaled = daily_weather$VWC_scaled),
                                cdate = daily_weather$date_reformat,
                                bdate = growth$date_reformat,
                                baseline = m_baseline,
@@ -77,7 +77,9 @@ for(species in sp_list){
                                #exclude = c(window_exclude_dur, window_exclude_max),                              
                                type = "absolute", refday = c(15, 06), 
                                stat = 'mean', 
-                               func = c('lin'))
+                               func = c('lin')) #,
+                               cv_by_cohort=T,
+                               ncores=1)
   
 
   # Refit with best variable added to baseline
