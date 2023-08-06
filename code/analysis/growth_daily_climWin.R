@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything before and including this year is used 
-sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -84,7 +84,6 @@ for(species in sp_list){
                                stat = 'mean', 
                                func = c('lin'), 
                           cv_by_cohort = TRUE, ncores = 8)
-  
 
   # Refit with best variable added to baseline
   addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area', fitStat = 'deltaMSE')
