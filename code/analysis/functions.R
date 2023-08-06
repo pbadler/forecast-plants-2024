@@ -95,11 +95,14 @@ prep_survival_for_climWin <- function( species, last_year, quad_info){
   return( survival )
 }
 
-addVars <- function( climWin , data1 , responseVar = 'survives'){ 
+addVars <- function( climWin , data1 , responseVar = 'survives', fitStat = 'deltaAICc'){ 
   
-  bestModel <- climWin$combos %>% 
-    filter( DeltaAICc == min(DeltaAICc) )  %>% 
-    filter( row_number() == 1 )
+  
+  bestModel <- climWin$combos[ which.min( climWin$combos[[fitStat]]), ]
+  
+  # bestModel <- climWin$combos %>% 
+  #   filter( !!fitStat == min(!!fitStat) )  %>% 
+  #   filter( row_number() == 1 )
   
   bestVar <- bestModel$climate %>% as.character()
   bestModelData <- climWin[[ which( climWin$combos$climate == bestVar )]]
@@ -112,7 +115,7 @@ addVars <- function( climWin , data1 , responseVar = 'survives'){
   data2$date_reformat <- data1$date_reformat
   
   if( bestVar == 'VWC_scaled'){ 
-    addVars = c('TMAX_scaled', 'TAVG_scaled', 'TMIN_scaled')
+    addVars = 'TMAX_scaled'
   }else{ 
     addVars = 'VWC_scaled'  
   }
@@ -139,13 +142,13 @@ get_calendar_dates <- function( x , foo_year = 1999, ref_date = '06-15') {
     select( -starts_with('foo'), -starts_with('month'), -starts_with('year'))
 }
 
-my_delta_plot <- function( climWinFit, temp_par ){ 
+my_delta_plot <- function( climWinFit, temp_par, fitStat ){ 
   
-  delta_plot <- plotdelta(climWinFit[[temp_par$fit]][[temp_par$index]]$Dataset)
+  delta_plot <- plotdelta(climWinFit[[temp_par$fit]][[temp_par$index]]$Dataset, fitStat = fitStat)
   
   delta_plot <- 
     delta_plot + 
-    guides(fill = guide_colorbar( 'DeltaAICc')) + 
+    guides(fill = guide_colorbar(fitStat )) + 
     ggtitle( 
       paste0(
         LETTERS[temp_par$fit] , ') ', 
@@ -234,19 +237,19 @@ size_by_climate_plots <- function( model, clim_var, label = 'D') {
   
 }
 
-getBestWindows <- function( combos ){ 
-  topModel <- which.min(combos$DeltaAICc)
+getBestWindows <- function( combos, fitStat = 'deltaAICc' ){ 
+  topModel <- which.min( combos[fitStat][[1]])
   window <- combos[topModel, ] %>% 
     mutate(index = topModel)
   return( window)
 }
 
-makeWindowTable <- function( WindowResult, species_name, type_name  ) { 
+makeWindowTable <- function( WindowResult, species_name, type_name , ... ) { 
   
-  getBestWindows(WindowResult[[1]]$combos) %>% 
+  getBestWindows(WindowResult[[1]]$combos, ... ) %>% 
     mutate( fit = 1 ) %>% 
     bind_rows(
-      getBestWindows(WindowResult[[2]]$combos) %>% 
+      getBestWindows(WindowResult[[2]]$combos, ... ) %>% 
         mutate( fit = 2 )
     ) %>% 
     mutate( species = species_name, type = type_name) %>% 
@@ -254,7 +257,7 @@ makeWindowTable <- function( WindowResult, species_name, type_name  ) {
 }
 
 
-make_window_plots <- function( window_df, sp ){ 
+make_window_plots <- function( window_df, sp, fitStat = 'deltaAICc' ){ 
   
   temp_windows <- 
     window_df %>% 
@@ -273,7 +276,7 @@ make_window_plots <- function( window_df, sp ){
   results <- eval(parse(text = temp_obj))  
   
   # First climate variable ----------------# 
-  fit1  <- my_delta_plot(results, temp_par)
+  fit1  <- my_delta_plot(results, temp_par, fitStat = fitStat)
   
   sXc1 <- size_by_climate_plots(
     results[[temp_par$fit]][[temp_par$index]]$BestModel, 
@@ -281,14 +284,14 @@ make_window_plots <- function( window_df, sp ){
   
   # Second fit, second climate variable ---# 
   temp_par <- temp_windows[2, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
-  fit2  <- my_delta_plot(results, temp_par)
+  fit2  <- my_delta_plot(results, temp_par, fitStat = fitStat)
   
   sXc2 <- size_by_climate_plots(
     results[[temp_par$fit]][[temp_par$index]]$BestModel, 
     clim_var = paste0( temp_par$climate, ' (', temp_par$WindowOpen, '-', temp_par$WindowClose, ' mos. back)'), 
     label = 'E') 
   
-  temp_title <- paste0( temp_par[, c('species', 'type')], collapse = ' ')
+  temp_title <- paste0( temp_par[, c('species', 'type')], fitStat, collapse = ' ')
   
   png(filename = paste0('figures/', str_squish(temp_title), "_window_plots.png"),
       width = 7,
@@ -348,7 +351,7 @@ cross_validate_growth <- function ( model, data, folds){
 
 
 cross_validate_survival <- function ( model, data, folds ){ 
-  out <- list( AUC = NA , RMSE = NA )
+  out <- list(LogLoss = NA, AUC = NA , RMSE = NA )
   
   for ( f in folds ) { 
     train = data[ -f, ]  
@@ -360,13 +363,15 @@ cross_validate_survival <- function ( model, data, folds ){
     if ( n_distinct(test$survives) == 2 ){ 
       tempROC <-  pROC::roc(test$survives, pred)
       tempAUC <- pROC::auc(tempROC) 
+      tempLogLoss <- -(test$survives*log(pred) + (1 - test$survives)*log(1 - pred))
     }else if( n_distinct(test$survives) != 2){ 
       print( "single level survival data")
       tempROC <- NA
       tempAUC <- NA
+      tempLogLoss <- NA
     }
     
-    
+    out$LogLoss <- c(out$logLoss, tempLogLoss)
     out$AUC <- c(out$AUC, tempAUC)
     out$RMSE <-c(out$RMSE,  caret::RMSE(pred = pred, obs = test$survives ))
     
@@ -377,7 +382,7 @@ cross_validate_survival <- function ( model, data, folds ){
 }
 
 
-plot_windows_no_intxn <- function(window_df, sp) { 
+plot_windows_no_intxn <- function(window_df, sp, fitStat = 'deltaAICc') { 
   
   temp_windows <- 
     window_df %>% 
@@ -399,11 +404,11 @@ plot_windows_no_intxn <- function(window_df, sp) {
   
   
   # First climate variable ----------------# 
-  fit1 <- my_delta_plot(results, temp_par)
+  fit1 <- my_delta_plot(results, temp_par, fitStat = fitStat)
   beta1 <- my_beta_plot(results, temp_par)
   # second climate var ------------------- #
   temp_par <- temp_windows[2, c('species', 'type', 'climate', 'fit', 'index', 'WindowOpen', 'WindowClose')]
-  fit2 <- my_delta_plot(results, temp_par)
+  fit2 <- my_delta_plot(results, temp_par, fitStat = fitStat)
   beta2 <- my_beta_plot(results, temp_par)
   
   temp_title <- paste0( temp_par[, c('species', 'type')], collapse = ' ')

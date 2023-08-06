@@ -24,9 +24,12 @@ growth_delta_cv_stats <- growth_cv %>%
 growth_delta_cv_stats$large  
 growth_delta_cv_stats$small
 
+
+
 # make a table out of this 
 growth_cv %>% 
-  arrange( size_class, species )
+  arrange( size_class, species ) %>% View 
+
 
 # rank models 
 growth_model_ranks <- growth_cv %>% 

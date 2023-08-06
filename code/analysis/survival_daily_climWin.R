@@ -34,23 +34,23 @@ for(species in sp_list){
                                         last_year = last_year, 
                                         quad_info = quad_info)
   
-  m_baseline <- glmer(
-    survives ~ area0*climate + W.intra + (1|year),
-    data = survival,
-    family = 'binomial',
-    control = glmerControl(optimizer = 'bobyqa'))
-
-  model_type <- "mer"
-  
-  # m_baseline <- glm( survives ~ 1 + area0*climate + W.intra, data = survival, family = 'binomial')
-  # model_type <- "glm"
+  # m_baseline <- glmer(
+  #   survives ~ area0*climate + W.intra + (1|year),
+  #   data = survival,
+  #   family = 'binomial',
+  #   control = glmerControl(optimizer = 'bobyqa'))
   # 
+  # model_type <- "mer"
+  # 
+  m_baseline <- glm( survives ~ 1 + area0*climate + W.intra, data = survival, family = 'binomial')
+  model_type <- "glm"
+
   write_csv( survival, paste0( 'data/temp/', species, '_ClimWin_Survival_data.csv'))
   write_rds( m_baseline, paste0( 'output/survival_models/', species, '_survival_', model_type, '_baseline.rds'))
   
   survivesWin <- slidingwin(xvar = list(VWC_scaled = daily_weather$VWC_scaled, 
-                                        TMAX_scaled = daily_weather$TMAX_scaled, 
-                                        TAVG_scaled = daily_weather$TAVG_scaled, 
+                                        #TMAX_scaled = daily_weather$TMAX_scaled, 
+                                        #TAVG_scaled = daily_weather$TAVG_scaled, 
                                         TMIN_scaled = daily_weather$TMIN_scaled),
                               cdate = daily_weather$date_reformat,
                               bdate = survival$date_reformat,
@@ -60,10 +60,10 @@ for(species in sp_list){
                               type = "absolute", 
                               refday = c(15, 06),
                               stat = 'mean', 
-                              func = c('lin'))
+                              func = c('lin'), cv_by_cohort = T, ncores = 8)
   
   # Refit with the best climate var in baseline 
-  addVars_list <- addVars(survivesWin, survival)
+  addVars_list <- addVars(survivesWin, survival, fitStat = 'deltaLogLoss')
   
   m_baseline <- update( m_baseline, paste0(  ". ~ . + area0*", addVars_list$bestVar), 
                         data = addVars_list$data2)
@@ -79,7 +79,7 @@ for(species in sp_list){
                            #exclude = c(window_exclude_dur, window_exclude_max),
                            type = "absolute", refday = c(15, 06),
                            stat = 'mean', 
-                           func = c('lin'))
+                           func = c('lin'), cv_by_cohort = T, ncores = 8)
   
   out_obj_name <- paste(species, 'survival', 'monthly_ClimWin', sep = '_')
   
@@ -104,14 +104,16 @@ for(species in sp_list){
                                         last_year = last_year, 
                                         quad_info = quad_info)
   
-  m_baseline <- glmer(
-    survives ~ area0 + W.intra + (1|year),
-    data = survival,
-    family = 'binomial',
-    control = glmerControl(optimizer = 'bobyqa'))
+  # m_baseline <- glmer(
+  #   survives ~ area0 + W.intra + (1|year),
+  #   data = survival,
+  #   family = 'binomial',
+  #   control = glmerControl(optimizer = 'bobyqa'))
+  # 
+  # model_type <- "mer"
   
-  model_type <- "mer"
-  
+  m_baseline <- glm( survives ~ 1 + area0*climate + W.intra, data = survival, family = 'binomial')
+  model_type <- "glm"
   #write_csv( survival, paste0( 'data/temp/', species, '_ClimWin_Survival_data.csv'))
   write_rds( m_baseline, paste0( 'output/survival_models/', species, '_survival_no_intxn_', model_type, '_baseline.rds'))
   
@@ -127,9 +129,9 @@ for(species in sp_list){
                             type = "absolute", 
                             refday = c(15, 06),
                             stat = 'mean', 
-                            func = c('lin'))
+                            func = c('lin'), cv_by_cohort = T, ncores = 8)
   
-  addVars_list <- addVars(survivesWin, survival)
+  addVars_list <- addVars(survivesWin, survival, fitStat = 'deltaLogLoss')
   
   m_baseline <- update( m_baseline, paste0(  ". ~ . + ", addVars_list$bestVar), 
                         data = addVars_list$data2)
@@ -145,7 +147,7 @@ for(species in sp_list){
                              #exclude = c(window_exclude_dur, window_exclude_max),
                              type = "absolute", refday = c(15, 06),
                              stat = 'mean', 
-                             func = c('lin'))
+                             func = c('lin'), cv_by_cohort = T, ncores = 8)
   
   out_obj_name <- paste(species, 'survival', 'no_intxn_monthly_ClimWin', sep = '_')
   

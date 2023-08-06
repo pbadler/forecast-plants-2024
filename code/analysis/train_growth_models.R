@@ -2,8 +2,6 @@ rm(list = ls() )
 library(tidyverse)
 library(lubridate)
 source('code/analysis/functions.R')
-
-
 # For each species this script fits a: 
 #  1. Growth model with size x climate interaction. 
 #  2. Growth model without size x climate interaction 
@@ -18,7 +16,7 @@ split_year <- 2010 # Training testing split year
 size_cutoff <- -1  # log scale size cutoff between large and small 
 quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
-growth_windows <- read_csv('output/growth_models/top_growth_windows.csv')
+growth_windows <- read_csv('output/growth_models/top_growth_windows_by_deltaMSE.csv')
 
 species_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
 sp <- 'ARTR'
@@ -44,7 +42,6 @@ for( sp in species_list){
                         open = second_var$WindowOpen, 
                         close = second_var$WindowClose)
 
-  
   temp_clim <- clim1 %>% 
     left_join(clim2, by = c('Treatment', 'year')) %>% 
     mutate( !!first_var$climate[1]:= as.numeric( scale(.data[[str_remove(first_var$climate[1], '_scaled')]] ))) %>% 
@@ -173,7 +170,6 @@ for( sp in species_list){
                         var = str_remove( second_var$climate[1], '_scaled'), 
                         open = second_var$WindowOpen, 
                         close = second_var$WindowClose)
-  
   
   temp_clim <- clim1 %>% 
     left_join(clim2, by = c('Treatment', 'year')) %>% 

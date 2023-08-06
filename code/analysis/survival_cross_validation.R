@@ -29,6 +29,7 @@ for( sp in species_list) {
   null_cv$species <- sp 
   null_cv$unit <- 'survival'
   
+  
   # climate model 
   clim_cv <- cross_validate_survival(model = s_model, data = all_dat , folds = folds)
   clim_cv$mtype <- "clim"
@@ -42,19 +43,18 @@ for( sp in species_list) {
   clim_no_intxn_cv$species <- sp 
   clim_no_intxn_cv$unit <- 'survival'
   
-  
-  # Average AUC scores 
+  # Average AUC and LogLoss scores 
   out[[sp]] <- bind_rows(
     null_cv, 
     clim_cv, 
     clim_no_intxn_cv) %>% 
     group_by( mtype, species, unit ) %>% 
-    summarise( AUC = mean(AUC, na.rm = T), RMSE = mean(RMSE) )  
+    summarise( AUC = mean(AUC, na.rm = T), RMSE = mean(RMSE) , LogLoss = mean(LogLoss))  
   
   out[[sp]]$AICc <- NA
   out[[sp]]$BIC <- NA
   out[[sp]]$DIC <- NA
-  
+
   out[[sp]]$AICc[ out[[sp]]$mtype == 'clim' ] <- MuMIn::AICc(  s_model )
   out[[sp]]$AICc[ out[[sp]]$mtype == 'null' ] <- MuMIn::AICc( s_model_null )
   out[[sp]]$AICc[ out[[sp]]$mtype == 'clim no intxn' ] <- MuMIn::AICc( s_model_no_intxn )
@@ -68,6 +68,7 @@ for( sp in species_list) {
   out[[sp]]$DIC[ out[[sp]]$mtype == 'clim no intxn' ] <- MuMIn::DIC( s_model_no_intxn )
   
 }
+
 cv_out <- do.call( rbind, out ) 
 
 cv_out %>% 

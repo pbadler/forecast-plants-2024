@@ -24,7 +24,7 @@ source('code/analysis/functions.R')
 
 # Variables -------------------------------- : 
 last_year <- 2010 # last year of training data, everything earlier is used 
-sp_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+sp_list <- c('ARTR') #, 'HECO', 'POSE', 'PSSP')
 
 # ClimWin Window Settings Monthly
 window_open_max <- 24
@@ -60,17 +60,21 @@ for(species in sp_list){
   growth <- growth %>% filter( area0 <= size_cutoff) # Small plants 
   
   ##baseline model for growth/size
-  m_baseline <- lmer( area ~ W.intra + (1|year),
-                      data = growth,
-                      REML = F,
-                      control = control_lmer)
-  model_type <- "mer"
-  
+  # m_baseline <- lmer( area ~ W.intra + (1|year),
+  #                     data = growth,
+  #                     REML = F,
+  #                     control = control_lmer)
+  # model_type <- "mer"
+
+  m_baseline <- lm( area ~ W.intra ,
+                      data = growth)
+  model_type <- "lm"
+    
   write_rds( m_baseline, paste0( 'output/growth_models/', species, '_growth_small_', model_type, '_baseline.rds'))
   
   growthWin <- slidingwin(xvar = list(TMAX_scaled = daily_weather$TMAX_scaled, 
-                                      TAVG_scaled = daily_weather$TAVG_scaled,
-                                      TMIN_scaled = daily_weather$TMIN_scaled, 
+                                      #TAVG_scaled = daily_weather$TAVG_scaled,
+                                      #TMIN_scaled = daily_weather$TMIN_scaled, 
                                       VWC_scaled = daily_weather$VWC_scaled),
                           cdate = daily_weather$date_reformat,
                           bdate = growth$date_reformat,
@@ -80,10 +84,10 @@ for(species in sp_list){
                           #exclude = c(window_exclude_dur, window_exclude_max),                              
                           type = "absolute", refday = c(15, 06), 
                           stat = 'mean', 
-                          func = c('lin'))
+                          func = c('lin'), ncores = 8, cv_by_cohort = T)
   
-  addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area')
-
+  addVars_list <- addVars(growthWin, data1 = growth, responseVar = 'area', fitStat = 'deltaMSE')
+  
   m_baseline <- update( m_baseline, paste0(  ". ~ . + ", addVars_list$bestVar), 
                         data = addVars_list$data2)
   
@@ -98,7 +102,7 @@ for(species in sp_list){
                            #exclude = c(window_exclude_dur, window_exclude_max),
                            type = "absolute", refday = c(15, 06),
                            stat = 'mean', 
-                           func = c('lin'))
+                           func = c('lin'), ncores = 8, cv_by_cohort = T)
   
   out_obj_name <- paste(species, 'growth_small', 'monthly_ClimWin', sep = '_')
   

@@ -19,7 +19,6 @@ for( sp in species_list) {
   all_dat_no_intxn <- read_csv(paste0( 'data/temp/', sp, '_growth_no_intxn_training_data.csv'))
   all_dat_small <- read_csv(paste0( 'data/temp/', sp, '_growth_small_training_data.csv') ) 
   
-  
   stopifnot( all( all_dat$pid == all_dat_no_intxn$pid) & all( all_dat$year == all_dat_no_intxn$year) ) # check that training data are for the same plants  
   
   g_model <- read_rds(paste0( 'output/growth_models/', sp, '_growth.rds'))
@@ -101,7 +100,6 @@ for( sp in species_list) {
   out[[sp]]$BIC[ out[[sp]]$mtype == 'null' & out[[sp]]$size_class == 'small' ] <- BIC(update( g_model_small_null, data =all_dat_small, REML = F))
   
 }
-
 cv_out <- do.call( rbind, out ) 
 
 cv_out %>% 
@@ -111,7 +109,6 @@ cv_out %>%
   select( species, unit, size_class, Treatment, Period, stat, value ) %>% 
   pivot_wider(names_from = stat, values_from = value)  %>% 
   write_csv('output/growth_models/cross_validation_growth_models.csv')
-
 
 
 
