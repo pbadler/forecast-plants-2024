@@ -12,11 +12,23 @@ source('code/analysis/functions.R')
 fitStat_growth <- 'deltaMSE' # can be delta AICc or deltaMSE 
 fitStat_survival <- 'deltaLogLoss' # deltaAICc or deltaLogLoss for survival models 
 
-result_files <- dir('output/growth_models', pattern = 'growth.*lm_monthly_ClimWin.rda', full.names = T)
+result_files <- dir('output/growth_models', pattern = 'growth.*mer_monthly_ClimWin.rda', full.names = T)
+
 
 for( i in result_files){ 
   load(i)
 }
+
+plotdelta(ARTR_growth_monthly_ClimWin$ClimWinFit1[[2]]$Dataset, fitStat = 'deltaMSE')
+plotdelta(POSE_growth_monthly_ClimWin$ClimWinFit1[[2]]$Dataset, fitStat = 'deltaMSE')
+plotdelta(HECO_growth_monthly_ClimWin$ClimWinFit1[[2]]$Dataset, fitStat = 'deltaMSE')
+
+(PSSP_growth_monthly_ClimWin$ClimWinFit1[[1]])
+
+plotdelta( PSSP_growth_monthly_ClimWin$ClimWinFit1[[1]]$Dataset)
+plotdelta( PSSP_growth_monthly_ClimWin$ClimWinFit2[[1]]$Dataset)
+
+PSSP_growth_monthly_ClimWin$ClimWinFit2[[1]]$Dataset %>% View 
 
 growth_windows <- bind_rows( 
   makeWindowTable(ARTR_growth_monthly_ClimWin, "ARTR", "growth", fitStat_growth), 

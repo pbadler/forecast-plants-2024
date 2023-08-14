@@ -5,7 +5,7 @@ library(lme4)
 source('code/analysis/functions.R')
 
 
-spList <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+spList <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 
 
 for( sp in spList ){ 

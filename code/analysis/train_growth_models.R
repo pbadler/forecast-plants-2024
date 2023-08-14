@@ -18,7 +18,7 @@ quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 growth_windows <- read_csv('output/growth_models/top_growth_windows_by_deltaMSE.csv')
 
-species_list <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 
 for( sp in species_list){ 
   

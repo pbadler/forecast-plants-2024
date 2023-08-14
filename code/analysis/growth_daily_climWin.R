@@ -53,20 +53,15 @@ for(species in sp_list){
   growth <- prep_growth_for_climWin(species, last_year = last_year, quad_info = quad_info, size_cutoff = size_cutoff)
   
   ##baseline model for growth/size
-  # m_baseline <- lmer( area ~ area0*climate + W.intra + (1|year/Group),
-  #                      data = growth,
-  #                      REML = F,
-  #                      control = control_lmer)
+  m_baseline <- lmer( area ~ area0*climate + W.intra + (1|year/Group),
+                       data = growth,
+                       REML = F,
+                       control = control_lmer)
 
-  # m_baseline <- lmer( area ~ area0*climate + W.intra + (1|year),
-  #                      data = growth,
-  #                      REML = F,
-  #                      control = control_lmer)
-  
-  #model_type <- "mer"
-  m_baseline <- lm( area ~ area0*climate + W.intra, data = growth)
-  model_type <- "lm"
-  
+  model_type <- "mer"
+  # m_baseline <- lm( area ~ area0*climate + W.intra, data = growth)
+  # model_type <- "lm"
+  # 
   write_csv( growth, paste0( 'data/temp/', species, '_ClimWin_Growth_data.csv'))
   write_rds( m_baseline, paste0( 'output/growth_models/', species, '_growth_', model_type, '_baseline.rds'))
   
@@ -126,18 +121,14 @@ for(species in sp_list){
 
   growth <- prep_growth_for_climWin(species, last_year = last_year, quad_info = quad_info, size_cutoff = size_cutoff)
   
-  # m_baseline <- lmer( area ~ area0 + W.intra + (1|year/Group),
-  #                     data = growth,
-  #                     REML = F,
-  #                     control = control_lmer)
-  # m_baseline <- lmer( area ~ area0 + W.intra + (1|year),
-  #                      data = growth,
-  #                      REML = F,
-  #                      control = control_lmer)
-  # model_type <- "mer"
-  
-  m_baseline <- lm( area ~ area0 + W.intra, data = growth)
-  model_type <- "lm"
+  m_baseline <- lmer( area ~ area0 + W.intra + (1|year/Group),
+                      data = growth,
+                      REML = F,
+                      control = control_lmer)
+
+  model_type <- "mer"
+  # m_baseline <- lm( area ~ area0 + W.intra, data = growth)
+  # model_type <- "lm"
 
   write_rds( m_baseline, paste0( 'output/growth_models/', species, '_growth_no_intxn_', model_type, '_baseline.rds'))
   

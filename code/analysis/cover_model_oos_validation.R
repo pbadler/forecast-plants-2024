@@ -2,9 +2,8 @@ rm(list = ls())
 library(tidyverse)
 source('code/analysis/functions.R')
 
-sp <- 'PSSP'
 split_year <- 2010
-spList <- c('ARTR', 'HECO', 'POSE', 'PSSP')
+spList <- c('ARTR') # ,'HECO', 'POSE', 'PSSP')
 
 for ( sp in spList ) { 
   cover_predictions <- read_csv(paste0( 'data/temp/', sp, '_cover_predictions.csv'))
