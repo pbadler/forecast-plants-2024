@@ -4,10 +4,9 @@ library(lubridate)
 source('code/analysis/functions.R')
 # For each species this script fits a: 
 #  1. Growth model with size x climate interaction. 
-#  2. Growth model without size x climate interaction 
-#  3. Null growth model without climate 
-#  4. Growth model for small plants 
-#  5. Null growth model for small plants 
+#  2. Null growth model without climate 
+#  3. Growth model for small plants 
+#  4. Null growth model for small plants 
 #  
 #  Finally it saves training and testing data for each model.
 # ----------------------------------------------------------  
@@ -16,7 +15,9 @@ split_year <- 2010 # Training testing split year
 size_cutoff <- -1  # log scale size cutoff between large and small 
 quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
-growth_windows <- read_csv('output/growth_models/top_growth_windows_by_deltaMSE.csv')
+
+# make seasonal_weather dataframe
+source("code/make_seasonal_weather.R")
 
 species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 

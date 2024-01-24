@@ -29,8 +29,8 @@ library(dfoptim)
 # run data preparation files first --------------------------- # 
 
 # comment these out after running once
-# source('code/figure_scripts/save_plot_theme.R')
-# source('code/prepare_data/make_all_data.R') # takes a minute or two 
+#source('code/figure_scripts/save_plot_theme.R')
+#source('code/prepare_data/make_all_data.R') # takes a minute or two 
 
 # Some treatment figures  ------------------------------------------ # 
 
@@ -47,7 +47,7 @@ source('code/figure_scripts/plot_soilwat_to_ambient_comparison.R')
 source('code/figure_scripts/test_for_shelter_temperature_effects.R')
 
 # 4. Soil moisture aggregated by season (not used)
-# source('code/figure_scripts/plot_seasonal_soil_moisture.R')
+#source('code/figure_scripts/plot_seasonal_soil_moisture.R')
 
 # 5. Temperature aggregated by season 
 # AK: Warning: Ignoring unknown aesthetics: x (?)
@@ -61,15 +61,6 @@ source('code/figure_scripts/plot_cover.R')
 # Use sliding windows from ClimWin package find best climate windows 
 # for growth and survival of each species. 
 source('code/analysis/prep_daily_weather.R')
-
-## Warning ## takes a while to run for all 4 species !!! 
-source('code/analysis/growth_daily_climWin.R')
-
-## WARNING ## takes hours to run for all 4 species (especially PSSP) !!!! 
-source('code/analysis/survival_daily_climWin.R') # !!!!!!!
-
-# plot  windows and save best windows to tables 
-source('code/analysis/plot_window_comparisons.R')
 
 # Refit models with chosen climate windows and save to output folder 
 source('code/analysis/train_growth_models.R')
