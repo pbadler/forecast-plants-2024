@@ -51,12 +51,7 @@ rm(D1,D2,tmp)
 
 # clean up dataset ----------------------------------------------
 allD$year[allD$year<2000] <- allD$year[allD$year<2000] + 1900
-
-if(doSpp=="ARTR"){
-  keep <- which(is.element(allD$Treatment,c("Control","No_grass", "Irrigation", "Drought")))
-}else{
-  keep <- which(is.element(allD$Treatment,c("Control","No_shrub", "Irrigation", "Drought")))
-}
+keep <- which(is.element(allD$Treatment,c("Control","Irrigation", "Drought")))
 allD <- allD[keep,]
 
 # remove outliers (large plants that obviously do not turn into tiny plants)

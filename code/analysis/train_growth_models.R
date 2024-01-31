@@ -16,73 +16,66 @@ size_cutoff <- -1  # log scale size cutoff between large and small
 quad_info <- read_csv( file = 'data/quad_info.csv')
 daily_weather <- read_csv('data/temp/daily_weather_for_models.csv')
 
-# make seasonal_weather dataframe
-source("code/make_seasonal_weather.R")
+### make seasonal_weather dataframe  
+
+daily_weather$year <- year(daily_weather$date)
+
+seasonal_weather <- daily_weather %>%
+  group_by(year,season,Treatment) %>%
+  summarise(VWC = mean(VWC), TAVG = mean(TAVG)) %>%
+  filter(season != "winter")
+
+# associate spring with year t, not t + 1
+seasonal_weather$year[seasonal_weather$season=="spring"] <- seasonal_weather$year[seasonal_weather$season=="spring"] - 1
+
+# change to wide format
+seasonal_weather <- pivot_wider(seasonal_weather, names_from=season, values_from = c(VWC,TAVG))
+
+### loop through species
 
 species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 
 for( sp in species_list){ 
   
-  temp <- 
-    growth_windows %>% 
-    filter( species == sp, 
-            type == 'growth')
+  # import demography data
+  size <- read.csv(paste0("data/temp/",sp,"_growth.csv"))
   
+  # join to climate data
+  size <- merge(size, seasonal_weather,all.x=T)
   
-  first_var <- temp[ temp$fit == 1, c('climate', 'WindowOpen', 'WindowClose', 'index', 'fit')] 
-  second_var <- temp[ temp$fit == 2, c('climate', 'WindowOpen', 'WindowClose', 'index', 'fit')]
+  # split by size
+  size_small <- subset(size, logarea.t0 <= size_cutoff )
+  size <- subset(size, logarea.t0 > size_cutoff )
   
-  clim1 <- getWindowAvg(daily_weather, 
-                        var = str_remove( first_var$climate[1], '_scaled'), 
-                        open = first_var$WindowOpen, 
-                        close = first_var$WindowClose)
-  
-  clim2 <- getWindowAvg(daily_weather, 
-                        var = str_remove( second_var$climate[1], '_scaled'), 
-                        open = second_var$WindowOpen, 
-                        close = second_var$WindowClose)
-
-  temp_clim <- clim1 %>% 
-    left_join(clim2, by = c('Treatment', 'year')) %>% 
-    mutate( !!first_var$climate[1]:= as.numeric( scale(.data[[str_remove(first_var$climate[1], '_scaled')]] ))) %>% 
-    mutate( !!second_var$climate[1]:=as.numeric( scale(.data[[str_remove(second_var$climate[1], '_scaled')]]))) %>% 
-    dplyr::select( Treatment, year, 
-            all_of(str_remove( first_var$climate[1], '_scaled')), 
-            all_of(str_remove( second_var$climate[1], '_scaled')), 
-            all_of(first_var$climate[1]), 
-            all_of(second_var$climate[1]))
-  
-  size <- prep_growth_for_climWin(species = sp, 
-                                  last_year = 2020, # get all data 
-                                  size_cutoff = -Inf, # get all data 
-                                  quad_info = quad_info) %>% 
-    mutate(size_class = ifelse( area0 > size_cutoff , "large", "small"))
-  
-  # Split training and testing data ------------- 
-  temp_dat <- 
-    size %>% 
-    filter( size_class == 'large') %>% 
-    filter( Treatment %in% c('Control', 'Drought', 'Irrigation')) %>% 
-    ungroup() %>%
-    left_join(temp_clim, by = c('year', 'Treatment')) %>% 
-    mutate( Split = ifelse( year <= split_year, 'Training', 'Testing')) %>% 
-    split( .$Split)
-  # ---------------------------------------------
-  
-  temp_name <- paste0( sp, '_growth')
+  # split training and testing
+  size_small_train <- subset(size_small, year <= split_year )
+  size_small_test <- subset(size_small, year > split_year )
+  rm(size_small)
+  size_train <- subset(size, year <= split_year )
+  size_test <- subset(size, year > split_year )
+  rm(size)
   
   # Save Training and Testing data 
-  stopifnot( max( temp_dat$Training$year ) <= split_year )
-  stopifnot( min( temp_dat$Testing$year ) > split_year )
+  stopifnot( max( size_train$year ) <= split_year )
+  stopifnot( min( size_test$year) > split_year )
   
-  write_csv( temp_dat$Training, paste0( 'data/temp/', temp_name, '_training_data.csv'))
-  write_csv( temp_dat$Testing, paste0( 'data/temp/', temp_name, '_testing_data.csv'))
+  temp_name <- paste0(sp,"_growth")
+  write_csv( size_train, paste0('data/temp/', temp_name, '_training_data.csv'))
+  write_csv( size_test, paste0( 'data/temp/', temp_name, '_testing_data.csv'))
+  write_csv( size_small_train, paste0('data/temp/', temp_name, '_small_training_data.csv'))
+  write_csv( size_small_test, paste0( 'data/temp/', temp_name, '_small_testing_data.csv'))
   
-  training_large <- 
-    temp_dat$Training %>% 
-    filter( size_class == 'large')
+  rm(size_test,size_small_test)
+  
+  ### fit models
   
   W.intra <- paste0( 'W.', sp)
+  
+  # Null model  
+  frm_null <- as.formula(  frm <- as.formula( paste0( 'logarea.t1 ~ logarea.t0 + ', W.intra, ' + (1|year/Group)' )))
+  mod_null <- lmer( formula = frm_null, data = size_train, control = control_lmer, REML = T)
+  model_name <- paste0( sp, '_growth_null')
+  #saveRDS(my_mod, paste0( "output/growth_models/", model_name, ".rds"))
   
   # Climate informed model 
   frm <- as.formula( paste0( 'area ~ area0*', first_var$climate[1], ' + area0*', second_var$climate[1], " + " , W.intra,   ' + (1|year/Group)' ))
