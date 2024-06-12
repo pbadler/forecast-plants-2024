@@ -1,6 +1,7 @@
 rm(list = ls() )
 library(tidyverse)
 library(lubridate)
+library(glmnet)
 source('code/analysis/functions.R')
 # For each species this script fits a: 
 #  1. Growth model with size x climate interaction. 
@@ -37,6 +38,8 @@ species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 
 for( sp in species_list){ 
   
+  W.intra <- paste0( 'W.', sp)
+  
   # import demography data
   size <- read.csv(paste0("data/temp/",sp,"_growth.csv"))
   
@@ -47,40 +50,86 @@ for( sp in species_list){
   size_small <- subset(size, logarea.t0 <= size_cutoff )
   size <- subset(size, logarea.t0 > size_cutoff )
   
-  # split training and testing
-  size_small_train <- subset(size_small, year <= split_year )
-  size_small_test <- subset(size_small, year > split_year )
-  rm(size_small)
-  size_train <- subset(size, year <= split_year )
-  size_test <- subset(size, year > split_year )
-  rm(size)
+  # prepare data
   
-  # Save Training and Testing data 
-  stopifnot( max( size_train$year ) <= split_year )
-  stopifnot( min( size_test$year) > split_year )
-  
-  temp_name <- paste0(sp,"_growth")
-  write_csv( size_train, paste0('data/temp/', temp_name, '_training_data.csv'))
-  write_csv( size_test, paste0( 'data/temp/', temp_name, '_testing_data.csv'))
-  write_csv( size_small_train, paste0('data/temp/', temp_name, '_small_training_data.csv'))
-  write_csv( size_small_test, paste0( 'data/temp/', temp_name, '_small_testing_data.csv'))
-  
-  rm(size_test,size_small_test)
+  # make model matrix
+  X <- data.frame(size = size$logarea.t0,
+                  intra = size[,which(names(size)==W.intra)],
+                  VWC_fall = size$VWC_fall,
+                  VWC_spring = size$VWC_spring,
+                  T_fall = size$TAVG_fall,
+                  T_spring = size$TAVG_spring,
+                  sizeVWC_fall = size$logarea.t0*size$VWC_fall,
+                  sizeVWC_spring = size$logarea.t0*size$VWC_spring,
+                  sizeT_fall = size$logarea.t0*size$TAVG_fall,
+                  sizeT_spring = size$logarea.t0*size$TAVG_spring)
+  X <- scale(X)  # standardize the continuous covariates
+ 
+  # split training and testing 
+  X_train <- X[size$year <= split_year,]
+  X_test <-  X[size$year > split_year,]
+  y_train <- size$logarea.t1[size$year <= split_year]
+  y_test <- size$logarea.t1[size$year > split_year]
+  rm(X)
   
   ### fit models
   
-  W.intra <- paste0( 'W.', sp)
-  
   # Null model  
-  frm_null <- as.formula(  frm <- as.formula( paste0( 'logarea.t1 ~ logarea.t0 + ', W.intra, ' + (1|year/Group)' )))
-  mod_null <- lmer( formula = frm_null, data = size_train, control = control_lmer, REML = T)
+  mod_null <- lm( y_train ~ X_train[,1:2])
   model_name <- paste0( sp, '_growth_null')
-  #saveRDS(my_mod, paste0( "output/growth_models/", model_name, ".rds"))
+  saveRDS(mod_null, paste0( "output/growth_models/", model_name, ".rds"))
   
   # Climate informed model 
-  frm <- as.formula( paste0( 'area ~ area0*', first_var$climate[1], ' + area0*', second_var$climate[1], " + " , W.intra,   ' + (1|year/Group)' ))
-  my_mod <- lmer( formula = frm, data = training_large, control = control_lmer, REML = T)
-  model_name <- paste0( sp, '_growth')
+  
+  # don't penalize size or previous year's abundance
+  pen_facts <- c(0,0,rep(1,ncol(X_train)-2))
+  
+  # specify leave-one-year-out cross-validation
+  my_folds <- as.numeric(as.factor(size$year[size$year <= split_year]))
+  
+  # Fit the model at all levels of lambda
+  fit <- cv.glmnet(
+    x = X_train, 
+    y = y_train, 
+    family = "gaussian",
+    alpha = 0,  # 0 == ridge regression, 1 == lasso, 0.5 ~~ elastic net
+    type.measure="mse",
+    penalty.factor = pen_facts,
+    foldid = my_folds
+  )
+  
+  # look at CV score vs penalty plot
+  plot(log(fit$lambda),fit$cvm)
+  
+  # extract and look at the best coefficients
+  best_coefs = fit$glmnet.fit$beta[,which(fit$lambda==fit$lambda.min)]
+  print(best_coefs)
+  
+  # plot coefficients against lambda
+  matplot(log(fit$lambda),t(fit$glmnet.fit$beta),ylab="Estimates",type="l")
+  abline(v=log(fit$lambda.min),col="red")
+  
+  
+  ### make predictions for test data
+  null_pred <- mod_null$coef[1] + mod_null$coef[2]*X_test[,1] + mod_null$coef[3]*X_test[,2]
+  null_mse <- mean((y_test - null_pred)^2)
+  clim_pred <- predict(fit,newx = X_test)
+  clim_mse <- mean((y_test - clim_pred)^2)
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   saveRDS(my_mod, paste0( "output/growth_models/", model_name, ".rds"))
 

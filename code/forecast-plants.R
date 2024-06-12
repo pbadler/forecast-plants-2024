@@ -5,6 +5,9 @@
 #############################################################
 
 rm(list = ls() ) 
+
+setwd("C:/repos/forecast-plants-2024")
+
 # library(sheepweather) # in-house package for weather data!!! 
 # see https://github.com/akleinhesselink/sheepweather
 
