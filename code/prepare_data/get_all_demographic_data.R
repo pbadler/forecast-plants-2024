@@ -5,10 +5,13 @@
 ####################################################################################
 
 rm(list = ls())
-
+focalSpp <- c("ARTR","HECO","POSE","PSSP")
 # growth
 source("code/prepare_data/growth/fetchGrowthData.R")
-source("code/prepare_data/growth/get_ARTR_growth.R")
+for(doSpp in focalSpp){
+  source(paste0("code/prepare_data/growth/get_",doSpp,"_growth.R"))
+}
+
 
 # survival
 source("code/prepare_data/survival/fetchSurvData.R")

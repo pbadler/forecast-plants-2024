@@ -87,6 +87,10 @@ allD$Treatment3 <- allD$Treatment
 allD$Treatment3[allD$Treatment=="Control" & allD$year>2000] <- "ControlModern"
 #allD$Treatment[ allD$year < 2012 & allD$Treatment %in% c('Drought', 'Irrigation') ] <- 'Control'  # set initial treatment to control
 
+# drop removal treatments
+tmp <- which(allD$Treatment=="No_shrub" | allD$Treatment=="No_grass")
+if(length(tmp)>0) allD <- allD[-tmp,]
+
 # ----------- use this data for prediction ------------------------------------------------------------------------------
 
 write.csv(allD, 'data/temp/POSE_growth.csv') 
