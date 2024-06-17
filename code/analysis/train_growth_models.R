@@ -38,9 +38,18 @@ names(tmp)[3:ncol(tmp)] <- paste0(names(tmp)[3:ncol(tmp)],"_lag")
 seasonal_weather <- merge(seasonal_weather,tmp)
 rm(tmp)
 
+# get wet degree days
+source('code/get_WDD.R')
+VWC_threshold <- 10
+start_month <- 1   # Sept is month 1 of the water year, March is 7
+annual_WDD <- get_WDD(daily_weather,VWC_threshold,start_month)
+names(annual_WDD)[1] <- "year"
+
+seasonal_weather <- merge(seasonal_weather,annual_WDD)
+
 ### loop through species
 
-species_list <- c('HECO')# ,'HECO', 'POSE', 'PSSP')
+species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
 
 for( sp in species_list){ 
   
@@ -58,23 +67,34 @@ for( sp in species_list){
   
   # prepare data
   
+  # # make model matrix
+  # X <- data.frame(size = size$logarea.t0,
+  #                 intra = size[,which(names(size)==W.intra)],
+  #                 VWC_fall = size$VWC_fall,
+  #                 VWC_spring = size$VWC_spring,
+  #                 VWC_spring_lag = size$VWC_spring_lag,
+  #                 T_fall = size$TAVG_fall,
+  #                 T_winter = size$TAVG_winter,
+  #                 T_spring = size$TAVG_spring,
+  #                 T_spring_lag = size$TAVG_spring_lag,
+  #                 sizeVWC_fall = size$logarea.t0*size$VWC_fall,
+  #                 sizeVWC_spring = size$logarea.t0*size$VWC_spring,
+  #                 sizeVWC_spring_lag = size$logarea.t0*size$VWC_spring_lag,
+  #                 sizeT_fall = size$logarea.t0*size$TAVG_fall,
+  #                 sizeT_winter = size$logarea.t0*size$TAVG_fall,
+  #                 sizeT_spring = size$logarea.t0*size$TAVG_spring,
+  #                 sizeT_spring_lag = size$logarea.t0*size$TAVG_spring_lag)
+  # X <- as.data.frame(scale(X))  # standardize the continuous covariates
+  
   # make model matrix
   X <- data.frame(size = size$logarea.t0,
                   intra = size[,which(names(size)==W.intra)],
-                  VWC_fall = size$VWC_fall,
-                  VWC_spring = size$VWC_spring,
-                  VWC_spring_lag = size$VWC_spring_lag,
-                  T_fall = size$TAVG_fall,
-                  T_winter = size$TAVG_winter,
-                  T_spring = size$TAVG_spring,
-                  T_spring_lag = size$TAVG_spring_lag,
-                  sizeVWC_fall = size$logarea.t0*size$VWC_fall,
-                  sizeVWC_spring = size$logarea.t0*size$VWC_spring,
-                  sizeVWC_spring_lag = size$logarea.t0*size$VWC_spring_lag,
-                  sizeT_fall = size$logarea.t0*size$TAVG_fall,
-                  sizeT_winter = size$logarea.t0*size$TAVG_fall,
-                  sizeT_spring = size$logarea.t0*size$TAVG_spring,
-                  sizeT_spring_lag = size$logarea.t0*size$TAVG_spring_lag)
+                  WDD = size$WDD,
+                  day50 = size$day50,
+                  WDDday50 = size$WDD*size$day50,
+                  sizeWDD = size$logarea.t0*size$WDD,
+                  sizeday50 = size$logarea.t0*size$day50,
+                  sizeWDDday50 = size$logarea.t0*size$WDD*size$day50)
   X <- as.data.frame(scale(X))  # standardize the continuous covariates
  
   # split training and testing 
