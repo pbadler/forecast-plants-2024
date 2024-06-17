@@ -23,8 +23,7 @@ daily_weather$year <- year(daily_weather$date)
 
 seasonal_weather <- daily_weather %>%
   group_by(year,season,Treatment) %>%
-  summarise(VWC = mean(VWC), TAVG = mean(TAVG)) %>%
-  filter(season != "winter")
+  summarise(VWC = mean(VWC), TAVG = mean(TAVG)) 
 
 # associate spring with year t, not t + 1
 seasonal_weather$year[seasonal_weather$season=="spring"] <- seasonal_weather$year[seasonal_weather$season=="spring"] - 1
@@ -32,9 +31,16 @@ seasonal_weather$year[seasonal_weather$season=="spring"] <- seasonal_weather$yea
 # change to wide format
 seasonal_weather <- pivot_wider(seasonal_weather, names_from=season, values_from = c(VWC,TAVG))
 
+# add lagged weather
+tmp <- seasonal_weather
+tmp$year <- tmp$year + 1
+names(tmp)[3:ncol(tmp)] <- paste0(names(tmp)[3:ncol(tmp)],"_lag")
+seasonal_weather <- merge(seasonal_weather,tmp)
+rm(tmp)
+
 ### loop through species
 
-species_list <- c('ARTR')# ,'HECO', 'POSE', 'PSSP')
+species_list <- c('HECO')# ,'HECO', 'POSE', 'PSSP')
 
 for( sp in species_list){ 
   
@@ -57,12 +63,18 @@ for( sp in species_list){
                   intra = size[,which(names(size)==W.intra)],
                   VWC_fall = size$VWC_fall,
                   VWC_spring = size$VWC_spring,
+                  VWC_spring_lag = size$VWC_spring_lag,
                   T_fall = size$TAVG_fall,
+                  T_winter = size$TAVG_winter,
                   T_spring = size$TAVG_spring,
+                  T_spring_lag = size$TAVG_spring_lag,
                   sizeVWC_fall = size$logarea.t0*size$VWC_fall,
                   sizeVWC_spring = size$logarea.t0*size$VWC_spring,
+                  sizeVWC_spring_lag = size$logarea.t0*size$VWC_spring_lag,
                   sizeT_fall = size$logarea.t0*size$TAVG_fall,
-                  sizeT_spring = size$logarea.t0*size$TAVG_spring)
+                  sizeT_winter = size$logarea.t0*size$TAVG_fall,
+                  sizeT_spring = size$logarea.t0*size$TAVG_spring,
+                  sizeT_spring_lag = size$logarea.t0*size$TAVG_spring_lag)
   X <- as.data.frame(scale(X))  # standardize the continuous covariates
  
   # split training and testing 
