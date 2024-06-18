@@ -26,6 +26,8 @@ seasonal_weather <- daily_weather %>%
   summarise(VWC = mean(VWC), TAVG = mean(TAVG)) 
 
 # associate spring and winter weather with year t, not t + 1
+# for example, winter and spring 1941 get changed to 1940, to associate with
+# the 1940 to 1941 growth transition
 seasonal_weather$year[seasonal_weather$season=="spring"] <- seasonal_weather$year[seasonal_weather$season=="spring"] - 1
 seasonal_weather$year[seasonal_weather$season=="winter"] <- seasonal_weather$year[seasonal_weather$season=="winter"] - 1
 
@@ -39,14 +41,16 @@ names(tmp)[3:ncol(tmp)] <- paste0(names(tmp)[3:ncol(tmp)],"_lag")
 seasonal_weather <- merge(seasonal_weather,tmp)
 rm(tmp)
 
-# # get wet degree days
-# source('code/get_WDD.R')
-# VWC_threshold <- 10
-# start_month <- 1   # Sept is month 1 of the water year, March is 7
-# annual_WDD <- get_WDD(daily_weather,VWC_threshold,start_month)
-# names(annual_WDD)[1] <- "year"
-# 
-# seasonal_weather <- merge(seasonal_weather,annual_WDD)
+# get wet degree days
+source('code/get_WDD.R')
+VWC_threshold <- 10
+start_month <- 1   # Sept is month 1 of the water year, March is 7
+annual_WDD <- get_WDD(daily_weather,VWC_threshold,start_month)
+names(annual_WDD)[1] <- "year"
+# re-index year to associate with year t of the t to t+1 transition
+annual_WDD$year <- annual_WDD$year - 1
+
+seasonal_weather <- merge(seasonal_weather,annual_WDD)
 
 ### loop through species
 
@@ -97,7 +101,7 @@ for( sp in species_list){
   #                 sizeday50 = size$logarea.t0*size$day50,
   #                 sizeWDDday50 = size$logarea.t0*size$WDD*size$day50)
   # X <- as.data.frame(scale(X))  # standardize the continuous covariates
-  # 
+
   # split training and testing 
   X_train <- X[size$year <= split_year,]
   X_test <-  X[size$year > split_year,]
